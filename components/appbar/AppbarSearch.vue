@@ -1,6 +1,6 @@
 <template>
     <Appbar>
-        <div class="flex items-center justify-between text-primary w-full">
+        <div class="flex items-center justify-between text-primary container">
             <div class="flex flex-[2] items-baseline gap-3">
                 <div id="logo" class="flex-initial">
                     <NuxtLink to="">
@@ -22,7 +22,7 @@
                             font-Inconsolata
                         "
                         placeholder="Case Iphone Javascript"
-                        :v-model="searchAppBar"
+                        v-model="searchAppBar"
                     >
                     <div class="flex items-center gap-2">
                         <Icon v-if="isSearching" name="eos-icons:loading" size="25"/>
@@ -38,10 +38,16 @@
                         <Icon name="uil:cart" class="text-[40px] "/>
                     </NuxtLink>
                 </div>
-                <div id="profile" class="">
-                    <NuxtLink to="">
-                        <Icon name="iconamoon:profile-fill" class="text-[40px]"/>
-                    </NuxtLink>
+                <div id="profile" class="" @mouseenter="isProfileShow = true" @mouseleave="isProfileShow = false">
+                    <Icon name="iconamoon:profile-fill" class="text-[40px]"/>
+                    <div v-if="isProfileShow" class="absolute w-[200px] h-[200px] rounded-[10px] -translate-x-[5.5rem] bg-third-color border flex justify-center">
+                        <button v-if="user" @click="signOut" class="bg-secondary border p-2 h-[50px]">
+                            SignOut
+                        </button>
+                        <button v-else @click="signIn" class="bg-secondary border p-2 h-[50px]">
+                            SignIn
+                        </button>
+                    </div>
                 </div>
                 <div id="chat" class="">
                     <NuxtLink to="">
@@ -55,8 +61,19 @@
 </template>
 
 <script setup lang="ts">
-// const searchAppBar = ref<String>('')
+const supabaseClient = useSupabaseClient()
+const user = useSupabaseUser()
+
+
 const isSearching = ref<boolean>(true)
+const isProfileShow = ref<boolean>(false)
+
+const signOut = async () => {
+    const { error } = await supabaseClient.auth.signOut()
+}
+const signIn = async () => {
+    await navigateTo('/auth/login')
+}
 
 const searchAppBar = defineModel<string>()
 </script>

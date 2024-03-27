@@ -23,7 +23,8 @@ export default <Partial<Config>> {
       'secondary': '#FDFD96',
       'third-color': '#FFFFFF',
       'gray-v1': '#F8F7F4',
-      'gray-darker': '#E4E4E4'
+      'gray-darker': '#E4E4E4',
+      'error-red': '#CC0202'
     },
     fontFamily: {
       'Inconsolata': ['Inconsolata', 'sans-serif'],

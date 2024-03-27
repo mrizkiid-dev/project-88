@@ -1,5 +1,5 @@
 <template>
-    <div class="fixed h-[60px] flex items-center gap-2 justify-center w-full px-[20px]" :class="bg ? bg : 'bg-none'">
+    <nav class="fixed h-[60px] flex items-center gap-2 justify-center w-full px-[20px]" :class="bg ? bg : 'bg-none'">
         <div id="text-input-mobile" class=" border border-primary flex items-baseline rounded-full w-full min-w-[20px]" :class="isGray ? 'bg-[#ECECEC]' : 'bg-third-color'">
             <input type="text" 
                 class="
@@ -10,7 +10,7 @@
                     focus:outline-none
                     rounded-full"
                 :class="isGray ? 'bg-[#ECECEC]' : 'bg-third-color'"
-                v-model="searchBar"    
+                v-model="searchAppBar"    
                 >
             <div class="p-2 pr-3 cursor-pointer" >
                 <Icon name="ph:magnifying-glass" size="25" color="#3A3A3A" />
@@ -24,7 +24,7 @@
                 <Icon name="uil:cart" size="30" color="#3A3A3A" />
             </NuxtLink>
         </div>
-    </div>
+    </nav>
 </template>
 
 <script setup lang="ts">
@@ -34,6 +34,8 @@ const { isGray, bg } = defineProps<{
 }>()
 
 
-const searchBar = defineModel<string>()
+const searchAppBar = defineModel<string>()
+
+
 
 </script>
