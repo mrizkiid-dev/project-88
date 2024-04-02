@@ -64,6 +64,9 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({
+    layout: 'home-page'
+})
 
 const { isMobile } = useScreen()
 const bestSeller = reactive({

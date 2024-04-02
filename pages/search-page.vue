@@ -8,6 +8,9 @@
 
 <script setup lang="ts">
 import type { IProduct } from '~/types/components/searchResult';
+definePageMeta({
+  layout: false
+})
 
 const store = useAppStore()
 
