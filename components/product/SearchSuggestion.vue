@@ -20,7 +20,7 @@
 const { isMobile, imageSrc, title, price } = defineProps<{
     isMobile?: boolean,
     imageSrc?: string,
-    title: string,
+    title: string, 
     price?: string,
 }>()
 </script>
