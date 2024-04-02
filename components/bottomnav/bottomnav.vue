@@ -1,11 +1,12 @@
 <template>
-    <footer class="fixed bottom-0 w-full">
-        <div class="flex justify-between px-[27px] py-[10px] text-primary shadow-[0px_-4px_4px_0px_#F3F2F2]">
+    <footer class="fixed z-50 bottom-0 left-0 right-0 w-full">
+        <div class="bg-third-color flex justify-between px-[27px] py-[10px] text-primary shadow-[0px_-2px_2px_0px_#F3F2F2]">
             <NuxtLink to="" class="cursor-pointer">
                 <Icon name="heroicons:home-solid" size="36" />
             </NuxtLink>
             <NuxtLink to="" class="cursor-pointer">
-                <Icon name="material-symbols:explore-rounded" size="36" />
+                <Icon name="uil:cart" size="36" />
+                <!-- <Icon name="material-symbols:explore-rounded" size="36" /> -->
             </NuxtLink>
             <div class="cursor-pointer" @click="openProfile">
                 <Icon name="iconamoon:profile-fill" size="36" />
@@ -15,7 +16,7 @@
             <div v-if="isProfileShow" class="fixed z-50 right-0 bottom-0 w-full h-screen bg-secondary opacity-50" @click="closeProfile"></div>
             <Transition>
                 <div v-if="isProfileShow" class="fixed z-50 right-0 bottom-0 w-full h-[50vh] bg-secondary transition-all duration-1000 ease-in">
-                    <div class="flex justify-end border" @click="closeProfile">X</div>
+                    <div class="flex justify-end" @click="closeProfile">X</div>
                 </div>
             </Transition>
         </div>

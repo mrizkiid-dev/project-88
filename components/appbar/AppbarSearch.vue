@@ -1,19 +1,22 @@
 <template>
     <Appbar>
         <div class="flex items-center justify-between text-primary container">
+
             <div class="flex flex-[2] items-baseline gap-3">
                 <div id="logo" class="flex-initial">
                     <NuxtLink to="">
                         <h1 class="font-Dela-Gothic-One text-xl">Project 88</h1>
                     </NuxtLink>
                 </div>
-                <div id="explore" class="">
+                <!-- Feature Future -->
+                <!-- <div id="explore" class="">
                     <NuxtLink>
                         <h1 class="font-Dela-Gothic-One text-base">Explore</h1>
                     </NuxtLink>
-                </div>
+                </div> -->
             </div>
-            <div id="searcbar" class="flex-[7]">
+
+            <div id="searcbar" class="flex-[7] relative" >
                 <div class="min-w-[300px] border-4 border-primary rounded-full flex pl-6">
                     <input type="text"
                         class="
@@ -31,7 +34,12 @@
                         </div>
                     </div>
                 </div>
+
+                <div v-if="searchResult" id="search-result" class="absolute border-2 border-primary bg-third-color rounded-lg p-4 w-full flex flex-col gap-4 px-6 mt-1 max-h-[300px] overflow-y-scroll no-scrollbar">
+                    <SearchSuggestion v-for="card in searchResult" :title="card.title" :image-src="card.image" />
+                </div>
             </div>
+
             <div class="flex flex-[2] gap-3 justify-end">
                 <div id="cart" class="first-of-type:">
                     <NuxtLink to="">
@@ -55,6 +63,7 @@
                     </NuxtLink>
                 </div>
             </div>
+            
         </div>
     </Appbar>      
 
@@ -64,6 +73,9 @@
 const supabaseClient = useSupabaseClient()
 const user = useSupabaseUser()
 
+const { searchResult } = defineProps<{
+    searchResult?: any
+}>()
 
 const isSearching = ref<boolean>(true)
 const isProfileShow = ref<boolean>(false)
@@ -76,4 +88,6 @@ const signIn = async () => {
 }
 
 const searchAppBar = defineModel<string>()
+
+
 </script>

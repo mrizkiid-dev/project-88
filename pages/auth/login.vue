@@ -20,9 +20,9 @@
                     <hr class="w-full"></hr>
                 </div>
                 <form action="" @submit.prevent class="flex flex-col gap-4" autocomplete="new-password">
-                    <TextField title="Email" :is-error="isErrorMessage" :is-mandatory="true" place-holder="example@email.com" v-model="email" />
-                    <TextField title="Password" :is-error="isErrorMessage" :is-mandatory="true" place-holder="••••••••••" :is-password="true" v-model="password" />
-                    <ButtonDarkMd style-css="mt-10" title="Login" @on-click="loginPassword"/>
+                    <TextField title="Email" input-type="text" :error="errorEmail" :is-mandatory="true" place-holder="example@email.com" v-model="form.email" />
+                    <TextField title="Password" :error="errorPassword" :is-mandatory="true" place-holder="••••••••••" :is-password="true" v-model="form.password" />
+                    <ButtonDarkMd :disable="isButtonDisable" style-css="mt-10" title="Login" @on-click="loginPassword"/>
                     <div class="flex justify-center text-base gap-2 md:text-lg">
                         <span class="">Don't have an account ? </span>
                         <NuxtLink to="/auth/signup">
@@ -30,8 +30,8 @@
                         </NuxtLink>
                     </div>
                 </form>
-                <div v-if="errorMessage" class="w-full bg-gray-darker text-error-red py-2 text-center rounded-[5px]">
-                    {{ errorMessage }}
+                <div v-if="error.message" class="w-full bg-gray-darker text-error-red py-2 text-center rounded-[5px]">
+                    {{ error.message }}
                 </div>
             </div>
         </div>
@@ -45,6 +45,8 @@ definePageMeta({
 })
 
 import type { Provider } from '~/node_modules/@supabase/gotrue-js/src/lib/types'
+import type { ISignInForm } from '~/types/pages/auth';
+import type { ITextfieldError } from '~/types/components/textfield';
 
 const supabaseClient = useSupabaseClient()
 const user = useSupabaseUser()
@@ -55,16 +57,15 @@ const loginProvider = async(prov: Provider) => {
 }
 const loginPassword = async() => {
     const { error } = await supabaseClient.auth.signInWithPassword({
-        email: email.value,
-        password: password.value,
+        email: form.email,
+        password: form.password,
     })
-}
 
-const signUp = async (email: string, password: string) => {
-  const { data, error } = await supabaseClient.auth.signUp({
-    email: email,
-    password: password,
-  })
+    if (error) {
+        error.message = error.message
+    }
+    isButtonDisable.value = true
+    console.table(form)
 }
 
 const signOut = async ()=> {
@@ -73,12 +74,94 @@ const signOut = async ()=> {
 
 
 // input
-const email = ref<string>('')
-const password = ref<string>('')
-
-const errorMessage = ref<string>('')
-const isErrorMessage = computed<boolean>(() => {
-    return errorMessage.value ? true : false
+const form = reactive<ISignInForm>({
+    email: '',
+    password: ''
 })
+
+//error
+const error = reactive<ITextfieldError>({
+    value: false,
+    message: ''
+})
+const errorEmail = reactive<ITextfieldError>({
+    value: false,
+    message: ''
+})
+const errorPassword = reactive<ITextfieldError>({
+    value: false,
+    message: ''
+})
+const isButtonDisable = ref<boolean>(true)
+
+watch([()=>form.email],() => {
+    const isEmailValid = emailValidator(form.email)
+    if(!isEmailValid && utils.isEmailEmpty()) {
+        utils.setErrorEmail(true,'email should be fill')
+    } else if(!isEmailValid) {
+        utils.setErrorEmail(true,'email is not valid')
+    } else {
+        utils.setErrorEmail(false)
+    }
+})
+
+watch([()=>form.password],() => {
+    const isPasswordValid = passwordValidator(form.password)
+    if(!isPasswordValid && utils.isPasswordEmpty()) {
+        utils.setErrorPassword(true,'password should be fill')
+    } else if(!isPasswordValid) {
+        utils.setErrorPassword(true,'password is too weak')
+    } else {
+        utils.setErrorPassword(false)
+    }
+})
+
+watch([() => form.email, () => form.password],() => {
+    const isEmailValid = emailValidator(form.email)
+    const isPasswordValid = passwordValidator(form.password)
+    if ( isEmailValid && isPasswordValid ) {
+        if( utils.isEMailOrPasswordEmpty() ) {
+            utils.setButtonDisable(true, 'Email and Password Should be fill')
+        } else {
+            utils.setButtonDisable(false)
+        }
+    } else {
+        utils.setButtonDisable(true)
+    }
+})
+
+
+const utils = {
+    isEmailEmpty : () => {
+        return form.email === '' ? true : false
+    },
+    isPasswordEmpty : () => {
+        return form.password === '' ? true : false
+    },
+    isEMailOrPasswordEmpty : function() {
+        return (this.isEmailEmpty() || this.isPasswordEmpty()) ? true : false
+    },
+    setErrorEmail: function(errorValue: boolean, message?: string) {
+        errorEmail.value = errorValue
+        errorEmail.message = message ?? ''
+        // isButtonDisable.value = errorEmail.value
+    },
+    setErrorPassword: function(errorValue: boolean, message?: string) {
+        errorPassword.value = errorValue
+        errorPassword.message = message ?? ''
+        // isButtonDisable.value = errorEmail.value
+    },
+    setButtonDisable: function(isDisable: boolean, errorMessage?: string) {
+        if (isDisable) {
+            error.value = isDisable
+            error.message = errorMessage ?? ''
+            isButtonDisable.value = error.value
+        } else {
+            error.value = false
+            error.message = ''
+            isButtonDisable.value = error.value
+        }
+    }
+}
 
 </script>

@@ -4,8 +4,17 @@
     border: 1px solid #3a3a3a4c;
 } */
 
+body {
+    font-family: Inconsolata, sans-serif;
+}
+
 @media only screen and (min-width: 760px) {
     .background-grid {
+        background-image: linear-gradient(#3a3a3a4c 1px, transparent 1px, transparent calc(100% - 1px), #3a3a3a4c calc(100% - 1px)), linear-gradient(90deg, #3a3a3a4c 1px, transparent 1px, transparent calc(100% - 1px), #3a3a3a4c calc(100% - 1px));
+        background-size: 6.25% 10%;
+        border: 1px solid #3a3a3a4c;
+      }
+      .background-grid-homepage {
         background-image: linear-gradient(#3a3a3a4c 1px, transparent 1px, transparent calc(100% - 1px), #3a3a3a4c calc(100% - 1px)), linear-gradient(90deg, #3a3a3a4c 1px, transparent 1px, transparent calc(100% - 1px), #3a3a3a4c calc(100% - 1px));
         background-size: 6.25% 10%;
         border: 1px solid #3a3a3a4c;
@@ -18,4 +27,66 @@
         background-size: 20% 10%;
         border: 1px solid #3a3a3a4c;
     }
+    .background-grid-homepage {
+        background-color: #FDFD96;
+    }
+}
+
+.marquee-w {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 45px;
+    overflow: hidden;
+}
+.marquee {
+    position: absolute;
+    display: block;
+    margin: auto auto;
+    white-space: nowrap;
+    overflow: hidden;
+    min-width: 90%;
+    height: 100%;
+}
+
+
+
+.marquee span {
+    display: inline-block;
+    text-align: center;
+    padding-left: 100%;
+    min-width: 100%;
+    height: 100%;
+    animation: marquee 20s linear infinite;
+}
+.marquee2 span {
+    animation-delay: 10s;
+}
+@keyframes marquee2 {
+    0% {
+        transform: translate(0, 0);
+    }
+    100% {
+        transform: translate(-100%, 0);
+    }
+}
+@keyframes marquee {
+    0% {
+        transform: translate(0, 0);
+    }
+    100% {
+        transform: translate(-100%, 0);
+    }
+}
+
+
+/* Hiding scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hiding scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
 }

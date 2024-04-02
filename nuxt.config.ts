@@ -22,7 +22,7 @@ export default defineNuxtConfig({
   imports: {
     dirs: [
       'data',
-      
+      'types'
     ]
   },
   tailwindcss: { exposeConfig: true, },
@@ -34,7 +34,9 @@ export default defineNuxtConfig({
     'nuxt-lodash',
     'nuxt-icon',
     '@nuxtjs/google-fonts',
-    'nuxt-vue3-google-signin'
+    'nuxt-vue3-google-signin',
+    '@nuxt/image',
+    '@vueuse/nuxt',
   ],
   supabase: {
     // url: process.env.SUPABASE_URL,
