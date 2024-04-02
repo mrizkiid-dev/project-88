@@ -1,6 +1,9 @@
 <template>
     <button :disabled="disabled" @click="onTap" class="bg-secondary border border-primary rounded-md text-primary " :class="sytleCss">
         {{ title }}
+        <slot>
+            
+        </slot>
     </button>
 </template>
 
@@ -8,7 +11,7 @@
 const { disabled, sytleCss, title } = defineProps<{
     disabled?: boolean,
     sytleCss?: string,
-    title: string
+    title?: string
 }>()
 
 const emit = defineEmits<{

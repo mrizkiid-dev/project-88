@@ -35,7 +35,8 @@
                     </div>
                 </div>
 
-                <div v-if="searchResult" id="search-result" class="absolute border-2 border-primary bg-third-color rounded-lg p-4 w-full flex flex-col gap-4 px-6 mt-1 max-h-[300px] overflow-y-scroll no-scrollbar">
+                <!-- searchResult -->
+                <div v-if="false" id="search-result" class="absolute border-2 border-primary bg-third-color rounded-lg p-4 w-full flex flex-col gap-4 px-6 mt-1 max-h-[300px] overflow-y-scroll no-scrollbar">
                     <SearchSuggestion v-for="card in searchResult" :title="card.title" :image-src="card.image" />
                 </div>
             </div>

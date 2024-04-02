@@ -58,7 +58,6 @@
                 <Catalogue />
             </li>
         </ol>
-        <!-- <ButtonBgYellow title="see more ..." sytleCss="px-4 text-xl font-bold"/> -->
         <ButtonDarkMd title="see more ..." styleCss="max-w-[300px] h-[20px]"/>
     </section>
 

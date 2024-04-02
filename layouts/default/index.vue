@@ -3,7 +3,7 @@
                 <AppbarSearchMobile v-if="isMobile" :is-gray="isGray" :search-result="searchResult" bg="bg-secondary" v-model="searchAppBar" :in-style="inStyle"/>
                 <AppbarSearch v-else v-model="searchAppBar" :search-result="searchResult"/>
         <!-- </ClientOnly> -->
-        <!-- <div :class="isMobile ? 'pt-[60px]' : 'pt-[70px]'"/> -->
+        <div :class="isMobile ? 'pt-[60px]' : 'pt-[70px]'"/>
         <slot >
         </slot>
         <b>{{ searchAppBar }}</b>
