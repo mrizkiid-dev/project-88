@@ -1,9 +1,9 @@
 <template>
     <ClientOnly>
-            <AppbarSearchMobile v-if="isMobile" :is-gray="true"/>
+            <AppbarSearchMobile v-if="isMobile" :is-gray="true" bg="bg-third-color"/>
             <AppbarSearch v-else/>
     </ClientOnly>
-    <div :class="isMobile ? 'pt-[60px]' : 'pt-[70px]'"/>
+    <!-- <div :class="isMobile ? 'pt-[40px]' : 'pt-[50px]'"/> -->
     <slot>
 
     </slot>
