@@ -12,14 +12,14 @@
                     <TextField title="Email" input-type="email" place-holder="example@email.com" :is-mandatory="true" v-model="form.email" :error="errorEmail" />
                     <TextField title="Password" :is-password="true" place-holder="••••••••••" :is-mandatory="true" v-model="form.password" :error="errorPassword" />
                     <div class="flex flex-col justify-between h-full">
-                        <TextField title="WA number" input-type="number" place-holder="081xxxxxxxxx" v-model="form.waNumber" />
+                        <TextField title="WA number" input-type="tel" place-holder="081xxxxxxxxx" v-model="form.waNumber" />
                         <ButtonDarkMd :disable="isButtonDisable" v-if="!isMobile" title="SignUp" style-css="max-w-[250px] md:min-h-[50px]" @on-click="signUp"/>
                     </div>
                 </div>
                 <div id="form-right" class="flex flex-col w-full gap-3 md:flex-1">
-                    <TextField title="Province" place-holder="Jawa Barat" v-model="form.province" />
-                    <TextField title="City" place-holder="Bandung" v-model="form.city" />
-                    <TextField title="District" place-holder="Antapani" v-model="form.district" />
+                    <DropdownForm title="Province" v-model="form.province" place-holder="Jawa Barat" :choose="provinces" :loading="isProvinceLoading" @on-tap="onTapProvince"/>
+                    <DropdownForm title="City" v-model="form.city" place-holder="Bandung" :choose="cities" :loading="isCityLoading" @on-tap="onTapCity"/>
+                    <DropdownForm title="District" v-model="form.district" place-holder="Antapani" :choose="districts" :loading="isDistrictLoading" @on-tap="onTapDistrict"/>
                     <TextFieldArea title="Additional Address" :is-mandatory="false" place-holder="hi ka ...." v-model="form.address"/>
                     <ButtonDarkMd :disable="isButtonDisable" v-if="isMobile" title="SignUp" style-css="min-h-[40px] w-full" @on-click="signUp"/>
                 </div>
@@ -27,20 +27,26 @@
             <b class="mt-10"><span class="text-[#CC0202]">*</span> Mandatory</b>
         </div>
     </main>
-    <teleport to="#pop-up">
-        <PopSignUp v-if="isSignUp.success" image-url="/img/email-confirmation.svg" @close-pop-up="closePopUp">
+    <teleport v-if="isSignUp.success" to="#pop-up">
+        <PopSignUp image-url="/img/email-confirmation.svg" @close-pop-up="closePopUp">
             <template #title>
                 <p>We have sent you email confirmation</p>
                 <p>Please check your inbox</p>
             </template>
         </PopSignUp>
-        <PopSignUp v-if="isSignUp.failServer" image-url="/img/error-warning.svg" @close-pop-up="closePopUp">
+    </teleport>
+
+    <teleport v-if="isSignUp.failServer" to="#pop-up">
+        <PopSignUp image-url="/img/error-warning.svg" @close-pop-up="closePopUp">
             <template #title>
                 <p>Oops something wrong</p>
                 <p>Please try again in few minutes</p>
             </template>
         </PopSignUp>
-        <PopSignUp v-if="isSignUp.failClient.value" image-url="/img/error-warning.svg" @close-pop-up="closePopUp">
+    </teleport>
+
+    <teleport v-if="isSignUp.failClient.value" to="#pop-up">
+        <PopSignUp image-url="/img/error-warning.svg" @close-pop-up="closePopUp">
             <template #title>
                 <p>{{isSignUp.failClient.errorMessage}}</p>
                 <p>Please try again</p>
@@ -61,6 +67,7 @@ definePageMeta({
 import Loading from '~/components/popup/loading.vue';
 import type { ITextfieldError } from '~/types/components/textfield';
 import type { ISignUpForm } from '~/types/pages/auth'
+import type { IChoose, ICity, IDistrict } from  '~/types/components/dropdownForm'
 
 onMounted(() => {
 })
@@ -74,9 +81,9 @@ const form = reactive<ISignUpForm>({
     email : '',
     password : '',
     waNumber : 0,
-    province : '',
-    city : '',
-    district : '',
+    province : null,
+    city : null,
+    district : null,
     address : '',
 })
 
@@ -101,32 +108,30 @@ const state = reactive({
 
 const signUp = async () => {
     state.loading = true
-  const { data, error } = await supabaseClient.auth.signUp({
-    email: form.email,
-    password: form.password,
-  })
+    const { data, error } = await supabaseClient.auth.signUp({
+        email: form.email,
+        password: form.password,
+    })
 
-  if (error) {
-    isSignUp.failClient.value = false
-    state.loading = false
-    console.log('error signup = ',error);
-  } else {
-    isSignUp.success = false
-    const { data, error } = await supabaseClient.from('user').insert([
-        { name: form.fullname, email: form.email, province: form.province, city: form.city, district: form.district, additional_address: form.address, whatsapp_number: form.waNumber }
-    ])
-    if(error) {
-        console.log('error = ',error);
-    }
-    if(data) {
-        console.log('data insert = ',data);
+    if (error) {
+        isSignUp.failClient.value = false
         state.loading = false
-        navigateTo('/')
+        console.log('error signup = ',error);
+    } else {
+        isSignUp.success = false
+        const { data, error } = await supabaseClient.from('user').insert([
+            { name: form.fullname, email: form.email, province: form.province, city: form.city, district: form.district, additional_address: form.address, whatsapp_number: form.waNumber }
+        ])
+        if(error) {
+            console.log('error = ',error);
+        }
+        if(data) {
+            console.log('data insert = ',data);
+            state.loading = false
+            navigateTo('/')
+        }
+        state.loading = false
     }
-    state.loading = false
-  }
-
-  console.log('data signup = ',data);
   
 }
 //pop up
@@ -136,6 +141,113 @@ const closePopUp = () => {
     console.log('closePopUp');
 }
 
+const sortArrayAsc = (a: IChoose, b: IChoose): number => {
+    let aName = a.name.toLowerCase()
+    let bName = b.name.toLowerCase()
+
+    if (aName < bName) {
+        return -1
+    }
+    if (aName > bName) {
+        return 1
+    }
+    return 0
+}
+
+//province
+const isProvinceLoading = ref<boolean>(false)
+const provinces = ref<IChoose[]>([])
+const onTapProvince = async () => {
+    if (provinces.value.length === 0) {
+        isProvinceLoading.value = true
+        form.city = null
+        try {
+            const data: IChoose[] = await $fetch('https://mrizkiid-dev.github.io/api-wilayah-indonesia/api/provinces.json',{ method: 'GET' })
+            provinces.value = data
+            provinces.value.sort(
+                (a,b) => {
+                let aName = a.name.toLowerCase()
+                let bName = b.name.toLowerCase()
+
+                if (aName < bName) {
+                    return -1
+                }
+                if (aName > bName) {
+                    return 1
+                }
+                return 0
+                }
+            )
+        } catch (error) {
+            console.log(error);
+        } finally {
+            isProvinceLoading.value = false
+        }
+    }
+}
+
+//City
+const isCityLoading = ref<boolean>(false)
+const cities = ref<ICity[]>([])
+const onTapCity = async () => {
+    if (form.province !== null && form.district?.regency_id !== form.province?.id) {
+        isCityLoading.value = true
+        form.district = null
+        try {
+            const data: IChoose[] = await $fetch(`https://mrizkiid-dev.github.io/api-wilayah-indonesia/api/regencies/${form.province.id}.json`,{ method: 'GET' })
+            cities.value = data
+            cities.value.sort(
+                (a,b) => {
+                let aName = a.name.toLowerCase()
+                let bName = b.name.toLowerCase()
+
+                if (aName < bName) {
+                    return -1
+                }
+                if (aName > bName) {
+                    return 1
+                }
+                return 0
+                }
+            )
+        } catch (error) {
+            console.log(error);
+        } finally {
+            isCityLoading.value = false
+        }
+    }
+}
+
+//District
+const isDistrictLoading = ref<boolean>(false)
+const districts = ref<IDistrict[]>([])
+const onTapDistrict = async () => {
+    if (form.city !== null && form.district?.regency_id !== form.city?.id) {
+        isDistrictLoading.value = true
+        try {
+            const data: IChoose[] = await $fetch(`https://mrizkiid-dev.github.io/api-wilayah-indonesia/api/districts/${form.city.id}.json`,{ method: 'GET' })
+            districts.value = data
+            districts.value.sort(
+                (a,b) => {
+                let aName = a.name.toLowerCase()
+                let bName = b.name.toLowerCase()
+
+                if (aName < bName) {
+                    return -1
+                }
+                if (aName > bName) {
+                    return 1
+                }
+                return 0
+                }
+            )
+        } catch (error) {
+            console.log(error);
+        } finally {
+            isDistrictLoading.value = false
+        }
+    }
+}
 
 ///
 // ERROR
@@ -201,17 +313,18 @@ const utils = {
     },
     isMandatoryEmpty : function () {
         return ((this.isEmailEmpty() || this.isPasswordEmpty()) || this.isFullNameEmpty())
-    }
+    },
+
 }
 
 onBeforeUnmount(() => {
-    form.fullname = ''
-    form.email = ''
-    form.password = ''
-    form.waNumber = 0
-    form.province = ''
-    form.city = ''
-    form.district = ''
+    form.fullname = '',
+    form.email = '',
+    form.password = '',
+    form.waNumber = 0,
+    form.province = null,
+    form.city = null,
+    form.district = null,
     form.address = ''
 })
 

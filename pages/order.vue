@@ -8,7 +8,7 @@
             Order
         </h1>
 
-        <div id="orders" class="bg-none container max-w-[1300px] p-5 rounded-lg flex flex-col gap-4 md:border md:bg-third-color">
+        <div id="orders" class="bg-none container max-w-[1300px] p-10 rounded-lg flex flex-col gap-10 md:border md:bg-third-color">
             <div v-for="order in orders" class="flex flex-col bg-third-color overflow-clip rounded-sm border">
                 <div class="bg-primary flex flex-col px-3 py-1 pb-2">
                     <h3 class="text-xl text-third-color font-semibold md:text-2xl">Order ID : {{ order.orderId }}</h3>

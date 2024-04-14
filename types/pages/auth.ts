@@ -1,11 +1,13 @@
+import type { IChoose, ICity, IDistrict } from "../components/dropdownForm"
+
 export interface ISignUpForm {
     fullname    : string
     email       : string
     password    : string
     waNumber    : number
-    province    : string
-    city        : string
-    district    : string
+    province    : IChoose | null
+    city        : ICity | null
+    district    : IDistrict | null
     address     : string
 }
 
