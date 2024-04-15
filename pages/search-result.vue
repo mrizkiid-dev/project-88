@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col items-center justify-center mt-4">
+    <div class="flex flex-col items-center justify-center py-[50px]" :class="[{'pt-[70px]': !isMobile}]">
         <div class="flex flex-col w-full container px-5 pt-10 md:py-0">
             <h3 class="font-bold">Result of '{{ keyword }}'</h3>
             <h5>{{ itemsLength }} items found</h5>
@@ -34,6 +34,8 @@
 </template>
 
 <script setup lang="ts">
+const { isMobile } = useScreen()
+
 const keyword = ref<string>('Javascript')
 const items = ref([
         { title: 'title-test' },

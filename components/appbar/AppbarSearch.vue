@@ -4,7 +4,7 @@
 
             <div class="flex flex-[2] items-baseline gap-3">
                 <div id="logo" class="flex-initial">
-                    <NuxtLink to="">
+                    <NuxtLink to="/">
                         <h1 class="font-Dela-Gothic-One text-xl">Project 88</h1>
                     </NuxtLink>
                 </div>
@@ -43,19 +43,35 @@
 
             <div class="flex flex-[2] gap-3 justify-end">
                 <div id="cart" class="first-of-type:">
-                    <NuxtLink to="">
+                    <NuxtLink to="/cart">
                         <Icon name="uil:cart" class="text-[40px] "/>
                     </NuxtLink>
                 </div>
                 <div id="profile" class="" @mouseenter="isProfileShow = true" @mouseleave="isProfileShow = false">
                     <Icon name="iconamoon:profile-fill" class="text-[40px]"/>
-                    <div v-if="isProfileShow" class="absolute w-[200px] h-[200px] rounded-[10px] -translate-x-[5.5rem] bg-third-color border flex justify-center">
-                        <button v-if="user" @click="signOut" class="bg-secondary border p-2 h-[50px]">
-                            SignOut
-                        </button>
-                        <button v-else @click="signIn" class="bg-secondary border p-2 h-[50px]">
-                            SignIn
-                        </button>
+                    <div v-if="isProfileShow" class="absolute min-w-[200px] rounded-[10px] -translate-x-[5rem] bg-third-color border flex flex-col gap-2 justify-start px-1 py-5">
+                        <div v-if="user">
+                            <div class="flex justify-center tracking-wider">
+                                <strong>Hello, </strong>
+                                <strong>{{ userDetail.name }}</strong>
+                            </div>
+                            <div class="bg-white px-2 py-1 shadow-sm cursor-pointer" @click="">
+                                Profile
+                            </div>
+                            <div class="bg-white px-2 py-1 shadow-sm cursor-pointer" @click="">
+                                Order
+                            </div>
+                            <div class="text-third-color flex justify-center mt-4">
+                                <button v-if="user" @click="signOut" class="bg-primary rounded-md px-3 py-1">
+                                    sign out
+                                </button>
+                            </div>
+                        </div>
+                        <div v-else class="flex justify-center">
+                            <button @click="signIn" class="bg-primary rounded-md px-3 py-1 text-third-color">
+                                    sign in
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div id="chat" class="">
@@ -90,5 +106,24 @@ const signIn = async () => {
 
 const searchAppBar = defineModel<string>()
 
+const userDetail = reactive<{
+    name: string,
+    address: {
+        province: string,
+        city: string,
+        district: string,
+    },
+    order: []
+}>(
+    {
+        name: 'Muhammad Rizki',
+        address: {
+            province: 'Jawa Barat',
+            city: 'Kota Bandung',
+            district: 'Arcamanik'
+        },
+        order: []
+    }
+)
 
 </script>

@@ -18,8 +18,8 @@
                 </div>
                 <div id="form-right" class="flex flex-col w-full gap-3 md:flex-1">
                     <DropdownForm title="Province" v-model="form.province" place-holder="Jawa Barat" :choose="provinces" :loading="isProvinceLoading" @on-tap="onTapProvince"/>
-                    <DropdownForm title="City" v-model="form.city" place-holder="Bandung" :choose="cities" :loading="isCityLoading" @on-tap="onTapCity"/>
-                    <DropdownForm title="District" v-model="form.district" place-holder="Antapani" :choose="districts" :loading="isDistrictLoading" @on-tap="onTapDistrict"/>
+                    <DropdownForm title="City" v-model="form.city" place-holder="Bandung" :choose="cities" :loading="isCityLoading"/>
+                    <DropdownForm title="District" v-model="form.district" place-holder="Antapani" :choose="districts" :loading="isDistrictLoading"/>
                     <TextFieldArea title="Additional Address" :is-mandatory="false" place-holder="hi ka ...." v-model="form.address"/>
                     <ButtonDarkMd :disable="isButtonDisable" v-if="isMobile" title="SignUp" style-css="min-h-[40px] w-full" @on-click="signUp"/>
                 </div>
@@ -54,6 +54,11 @@
         </PopSignUp>
         <Loading v-if="state.loading" />
     </teleport>
+
+    <teleport v-if="state.loading" to="#pop-up">
+        <Loading />
+    </teleport>
+    
 </template>
 
 <script setup lang="ts">
@@ -120,7 +125,7 @@ const signUp = async () => {
     } else {
         isSignUp.success = false
         const { data, error } = await supabaseClient.from('user').insert([
-            { name: form.fullname, email: form.email, province: form.province, city: form.city, district: form.district, additional_address: form.address, whatsapp_number: form.waNumber }
+            { name: form.fullname, email: form.email, province: form.province?.name, city: form.city?.name, district: form.district?.name, additional_address: form.address, whatsapp_number: form.waNumber }
         ])
         if(error) {
             console.log('error = ',error);
@@ -139,19 +144,6 @@ const closePopUp = () => {
     isSignUp.failClient.value = false
     isSignUp.success = false
     console.log('closePopUp');
-}
-
-const sortArrayAsc = (a: IChoose, b: IChoose): number => {
-    let aName = a.name.toLowerCase()
-    let bName = b.name.toLowerCase()
-
-    if (aName < bName) {
-        return -1
-    }
-    if (aName > bName) {
-        return 1
-    }
-    return 0
 }
 
 //province
@@ -186,11 +178,13 @@ const onTapProvince = async () => {
     }
 }
 
-//City
+// City
 const isCityLoading = ref<boolean>(false)
 const cities = ref<ICity[]>([])
-const onTapCity = async () => {
-    if (form.province !== null && form.district?.regency_id !== form.province?.id) {
+watch(() => form.province, async () => {
+    form.city = null
+    form.district = null
+    if (form.province) {
         isCityLoading.value = true
         form.district = null
         try {
@@ -216,13 +210,14 @@ const onTapCity = async () => {
             isCityLoading.value = false
         }
     }
-}
+})
 
-//District
+// District
 const isDistrictLoading = ref<boolean>(false)
 const districts = ref<IDistrict[]>([])
-const onTapDistrict = async () => {
-    if (form.city !== null && form.district?.regency_id !== form.city?.id) {
+watch(() => form.city, async () => {
+    form.district = null
+    if (form.city !== null) {
         isDistrictLoading.value = true
         try {
             const data: IChoose[] = await $fetch(`https://mrizkiid-dev.github.io/api-wilayah-indonesia/api/districts/${form.city.id}.json`,{ method: 'GET' })
@@ -247,7 +242,8 @@ const onTapDistrict = async () => {
             isDistrictLoading.value = false
         }
     }
-}
+})
+
 
 ///
 // ERROR

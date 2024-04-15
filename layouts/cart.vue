@@ -1,6 +1,6 @@
 <template>
-    <AppbarTitle ref="appbarTitleRef" v-if="isMobile" title="Cart"/>
-    <AppbarSearch ref="appbarSearchRef" v-else/>
+    <AppbarTitle v-if="isMobile" title="Cart"/>
+    <AppbarSearch v-else/>
     <slot>
 
     </slot>

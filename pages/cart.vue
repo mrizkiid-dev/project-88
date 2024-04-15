@@ -115,7 +115,8 @@ import { useUserTransactionStore } from '~/stores/user-transaction';
 import type { ICart } from '~/types/pages/cart';
 
 definePageMeta({
-  layout: "cart",
+  layout: 'cart',
+  middleware: 'auth'
 });
 
 const { isMobile } = useScreen()
