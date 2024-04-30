@@ -102,7 +102,7 @@ export const opaque = [
     "00"
 ];
 
-const opaqueObject = {
+export const opaqueObject = {
     100: 'FF',
     99: 'FC',
     98: 'FA',

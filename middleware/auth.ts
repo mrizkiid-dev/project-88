@@ -16,8 +16,4 @@ export default defineNuxtRouteMiddleware((to, from) => {
     if(user.value && (to.fullPath == '/auth/login' || to.fullPath == '/auth/signup')) {
         return navigateTo('/')
     }
-
-    console.log('middleware from ',from.fullPath);
-    console.log('middleware to ',to.fullPath);
-    
 })

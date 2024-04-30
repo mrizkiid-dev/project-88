@@ -20,10 +20,10 @@
 
             <div id="right" class="basis-full flex flex-col items-stretch justify-between gap-20 lg:gap-12">
                 <div class="flex flex-col gap-5 h-full">
-                    <h2 id="title" class="font-extrabold font-Inconsolata text-xl md:text-2xl">{{ detailProduct.title }}</h2>
-                    <p id="description" class="text-base md:text-lg">{{ detailProduct.description }}</p>
+                    <h2 id="title" class="font-extrabold font-Inconsolata text-xl md:text-2xl">{{ title }}</h2>
+                    <p id="description" class="text-base md:text-lg">{{ description }}</p>
                     <div class="w-full">
-                        <span class="font-black text-third-color inline-block text-lg px-3 py-2 bg-primary md:text-xl">Rp. {{ detailProduct.price }}</span>
+                        <span class="font-black text-third-color inline-block text-lg px-3 py-2 bg-primary md:text-xl">Rp. {{ price }}</span>
                     </div>
                 </div>
                 <ButtonBgYellow sytle-css="w-full mx-auto md:w-[500px] border-2 border-primary">
@@ -39,37 +39,91 @@
 </template>
 
 <script setup lang="ts">
+import type { ICatalogue } from '~/types/database/product';
+
 
 definePageMeta({
     layout: 'product-detail'
 })
-
 const route = useRoute()
-const images = ref([
-    {id: '1', imageSrc: '/img/products/product-example-1.png', isChoose: true},
-    {id: '2', imageSrc: '/img/products/product-example-2.png', isChoose: false},
-    {id: '3', imageSrc: '/img/products/product-example-3.png', isChoose: false},
-    {id: '4', imageSrc: '/img/products/product-example-4.jpg', isChoose: false},
-    {id: '5', imageSrc: '/img/products/product-example-5.png', isChoose: false},
-])
+
+type TImage = {
+    id: number | string
+    imageSrc: string
+    isChoose: boolean
+}
+
+const client = useSupabaseClient()
+
+//detail product
+const title = ref<string>('')
+const description = ref<string>('')
+const price = ref<string>('')
+const product = ref<ICatalogue[]>([])
+
+onMounted(() => {
+    if(data.value !== null) {
+        data.value[0].product_image.forEach(img => {
+            images.value.push({
+                    id: img.id,
+                    imageSrc: img.image_url,
+                    isChoose: false
+            })
+        });
+        images.value[0].isChoose = true
+        title.value = data.value[0].name
+        description.value = data.value[0].desc
+        price.value = data.value[0].price
+    }
+})
+
+const headers = useRequestHeaders(['cookie'])
+const { data, pending, error, status, refresh } = useLazyAsyncData('product-detail', async () => {
+    const { data,error } = await client.from('product').select(`*,product_image(id,image_url)`).order('sell_out',{ ascending: false }).eq(`id`,route.params.id).limit(1).returns<ICatalogue[]>()
+    if (error) {
+        console.log('error = ',error);   
+        throw createError({
+            statusMessage: error?.message,
+            statusCode: 404,
+            message: error?.message,
+        })
+    }
+    return data
+},)
+
+
+if(error.value) {
+    console.log('error = ',error);
+}
+
+const images = ref<TImage[]>([])
+watch(status, () => {
+    if (status.value === 'success' && data && data.value) {
+        data.value[0].product_image.forEach(img => {
+            images.value.push({
+                    id: img.id,
+                    imageSrc: img.image_url,
+                    isChoose: false
+            })
+        });
+        images.value[0].isChoose = true
+        title.value = data.value[0].name
+        description.value = data.value[0].desc
+        price.value = data.value[0].price
+    }
+})
+
 const displayImage = computed(() => {
     let image = images.value.find(image => image.isChoose)
     return image?.imageSrc
 })
 
-const setDisplayImage = (image: any) => {
+const setDisplayImage = (image: TImage) => {
     let imageResult = images.value.find(image => image.isChoose)
     if (imageResult != undefined) {
         imageResult.isChoose = false
     }
     image.isChoose = !image.isChoose
 }
-
-const detailProduct = ref({
-    title: 'Title',
-    description: `Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.`,
-    price: '87.250'
-})
-
 
 </script>

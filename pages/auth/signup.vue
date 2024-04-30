@@ -17,9 +17,12 @@
                     </div>
                 </div>
                 <div id="form-right" class="flex flex-col w-full gap-3 md:flex-1">
-                    <DropdownForm title="Province" v-model="form.province" place-holder="Jawa Barat" :choose="provinces" :loading="isProvinceLoading" @on-tap="onTapProvince"/>
-                    <DropdownForm title="City" v-model="form.city" place-holder="Bandung" :choose="cities" :loading="isCityLoading"/>
-                    <DropdownForm title="District" v-model="form.district" place-holder="Antapani" :choose="districts" :loading="isDistrictLoading"/>
+                    <DropdownForm title="Province" v-model="form.province" place-holder="Jawa Barat"
+                        :is-show-drop-down="isShowDropDown.province" :choose="provinces" :loading="isProvinceLoading" @on-tap="onTapProvince" @on-tap-drop-down="onTapDropDownProvince"/>
+                    <DropdownForm title="City" v-model="form.city" place-holder="Bandung" empty-warning="province should not be empty"
+                        :is-show-drop-down="isShowDropDown.city" :choose="cities" :loading="isCityLoading" @on-tap="onTapCity" @on-tap-drop-down="onTapDropDownCity"/>
+                    <DropdownForm title="District" v-model="form.district" place-holder="Antapani" empty-warning="city should not be empty"
+                        :is-show-drop-down="isShowDropDown.district" :choose="districts" :loading="isDistrictLoading" @on-tap="onTapDistrict" @on-tap-drop-down="onTapDropDownDistrict"/>
                     <TextFieldArea title="Additional Address" :is-mandatory="false" place-holder="hi ka ...." v-model="form.address"/>
                     <ButtonDarkMd :disable="isButtonDisable" v-if="isMobile" title="SignUp" style-css="min-h-[40px] w-full" @on-click="signUp"/>
                 </div>
@@ -176,6 +179,7 @@ const onTapProvince = async () => {
             isProvinceLoading.value = false
         }
     }
+    dropDownProvince()
 }
 
 // City
@@ -243,6 +247,41 @@ watch(() => form.city, async () => {
         }
     }
 })
+
+//DropDown Logic
+const isShowDropDown = reactive({
+    province: false,
+    city: false,
+    district: false
+})
+
+const onTapDropDownProvince = () => {
+    isShowDropDown.province = false
+}
+const onTapDropDownCity = () => {
+    isShowDropDown.city = false
+}
+const onTapDropDownDistrict = () => {
+    isShowDropDown.district = false
+}
+
+const dropDownProvince = () => {
+    isShowDropDown.province = !isShowDropDown.province
+    isShowDropDown.city = false
+    isShowDropDown.district = false
+}
+
+const onTapCity = () => {
+    isShowDropDown.province = false
+    isShowDropDown.city = !isShowDropDown.city
+    isShowDropDown.district = false
+}
+
+const onTapDistrict = () => {
+    isShowDropDown.province = false
+    isShowDropDown.city = false
+    isShowDropDown.district = !isShowDropDown.district
+}
 
 
 ///

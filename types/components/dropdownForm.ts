@@ -7,6 +7,9 @@ export interface IDropdownForm {
     error?: ITextfieldError,
     choose?: IChoose[],
     loading?: boolean,
+    disable?: boolean,
+    isShowDropDown?: boolean
+    emptyWarning?: string
 }
 
 export interface IChoose {

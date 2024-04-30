@@ -15,4 +15,6 @@ const store = useAppStore()
 const { isMobile, width } = useScreen()
 store.isMobile = isMobile
 
+
+
 </script>

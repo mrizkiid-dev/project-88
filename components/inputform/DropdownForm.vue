@@ -18,12 +18,25 @@
                     </div>
                 </div>
             </div>
-            <div v-if="isShowDropDown" 
-                class="border border-primary absolute z-[2] w-full h-[200px] mt-2 rounded-md overflow-y-scroll py-3 flex flex-col gap-1" 
+            <div v-if="isShowDropDown && (choose !== undefined && choose.length > 0)"
+                class="border border-primary absolute z-[3] w-full max-h-[200px] mt-2 rounded-md overflow-y-scroll py-3 flex flex-col gap-1 drop-shadow-md" 
                 :class="[{'bg-gray-darker': !isMandatory}, {'bg-third-color': isMandatory}]">
                 <div v-for="item in choose" :key="item.id">
                     <div class="hover:bg-third-color cursor-pointer px-3 select-none" @click="vForm(item)" >{{ item.name }}</div>
                 </div>
+                <!-- <div v-if="choose !== undefined">
+                    <div v-for="item in choose" :key="item.id">
+                        <div class="hover:bg-third-color cursor-pointer px-3 select-none" @click="vForm(item)" >{{ item.name }}</div>
+                    </div>
+                </div>
+                <div v-else>
+                    <p class="py-4">Data Kosong</p>
+                </div> -->
+            </div>
+            <div v-else-if="isShowDropDown && (choose === undefined || (choose !== undefined && choose.length === 0))" 
+                class="border border-r-error-red absolute z-[3] w-full max-h-[200px] mt-2 rounded-md py-3 flex justify-center drop-shadow-md" 
+                :class="[{'bg-gray-darker': !isMandatory}, {'bg-third-color': isMandatory}]">
+                <p class="">{{ emptyWarning }}</p>
             </div>
         </div>
         <p class="text-error-red">{{ error?.message }}</p>
@@ -32,22 +45,24 @@
 
 <script setup lang="ts">
 import type { IChoose, IDropdownForm } from '~/types/components/dropdownForm'
-const { title, placeHolder, isMandatory, error, choose, loading } = defineProps<IDropdownForm>()
+const { title, placeHolder, isMandatory, error, choose, loading, isShowDropDown, emptyWarning } = defineProps<IDropdownForm>()
 
 const input = defineModel<IChoose | null>({ required: true})
-const isShowDropDown = ref<boolean>(false)
+// const isShowDropDown = ref<boolean>(false)
 // const input = ref<string>()
 const emit = defineEmits<{
-    onTap: []
+    onTap: [],
+    onTapDropDown: []
 }>()
 
 const vForm = (item: IChoose) => {
     input.value = item
-    isShowDropDown.value = false
+    // isShowDropDown.value = false
+    emit('onTapDropDown')
 }
 
 const showListOfValue = () => {
-    isShowDropDown.value = !isShowDropDown.value
+    // isShowDropDown.value = !isShowDropDown.value
     emit('onTap')
 }
 
