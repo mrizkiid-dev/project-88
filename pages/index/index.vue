@@ -37,7 +37,7 @@
                 <p>product</p>
                 <p>for you</p>
             </div>
-            <ol ref="el" id="best-seller-product" class="py-4 md:py-10 flex flex-row gap-3 relative overflow-x-scroll scroll-smooth no-scrollbar scrolling-wrapper" :onscroll="scrollBestSeller">
+            <ol ref="el" id="best-seller-product" class="py-4 md:py-10 flex flex-row gap-3 relative overflow-x-scroll scroll-smooth no-scrollbar scrolling-wrapper" @scroll="scrollBestSeller">
                 <li>
                     <h1 class="text-5xl font-black flex flex-col justify-center items-start invisible relative z-[2] pr-5 md:text-7xl">
                         <p>Best</p>
@@ -50,18 +50,6 @@
                     <Catalogue :id="stringToNumber(product.id)" :title="product.name" :image-src="product.product_image[0].image_url" :price="stringToNumber(product.price)"/>
                 </li>
             </ol>
-
-            <!-- <div v-if="isMobile" id="button-arrow" class="absolute top-0 z-[3] w-full h-full px-5">
-                
-                <div class="flex items-center justify-between w-full h-full">
-                    <button class="bg-gray-v1 py-2 border border-primary" :class="[{'visible' : isLeftArrow},{'invisible': !isLeftArrow}]" @click="goLeft">
-                        <Icon name="ep:arrow-left-bold" size="20" class="text-primary"/>
-                    </button>
-                    <button class="bg-gray-v1 py-2 border border-primary" @click="goRight">
-                        <Icon name="ep:arrow-left-bold" size="20" class="rotate-180 text-primary"/>
-                    </button>
-                </div>
-            </div> -->
 
         </div> 
         <div v-if="!isMobile" class="absolute h-full z-[3] top-72 left-1">
@@ -134,6 +122,8 @@ const goRight = () => {
     }
 }
 const changeIsLeftArrow = (x: number) => {
+    console.log(x);
+    
     if (x > 50) {
         isLeftArrow.value = true
     } else {
@@ -149,12 +139,11 @@ const changeIsLeftArrow = (x: number) => {
     }
 }
 
-const scrollBestSeller = async () => {
+const scrollBestSeller = () => {
     if(el.value !== undefined && el.value !== null) {
         changeIsLeftArrow(el.value?.scrollLeft)
     }
 }
-
 
 
 
@@ -170,11 +159,7 @@ const { data: catalogue, pending: loadingCatalogue, error: errorCatalogue, refre
         })
     }
     return data
-},
-    // {
-    //     server: false
-    // }
-)
+},)
 const seeMore = () => {
     navigateTo({
         path: 'search-result',
