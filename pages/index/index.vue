@@ -1,5 +1,6 @@
 <template>
     <header class="bg-secondary w-full h-[400px] md:h-[90vh] flex flex-row pt-[60px] background-grid-homepage">
+        <AddtocartNotification :is-show="isPopUpShow" @on-tap="onTap" />
 
         <div class="flex flex-1 items-center justify-center">
             <div class="flex flex-col justify-start items-start border-third-color w-max-[50px]">
@@ -25,9 +26,9 @@
             <div class="marquee">
                 <span>{{ headline }}&nbsp;</span> 
             </div>
-            <div class="marquee marquee2">
+            <!-- <div class="marquee marquee2">
                 <span>{{ headline }}</span>
-            </div>
+            </div> -->
         </div>
         <div v-if="!loadingBestSeller && bestSeller" class="relative">
 
@@ -47,7 +48,7 @@
                     </h1>
                 </li>
                 <li v-for="product in bestSeller" :key="product.id" class="relative z-[2]" > 
-                    <Catalogue :id="stringToNumber(product.id)" :title="product.name" :image-src="product.product_image[0].image_url" :price="stringToNumber(product.price)"/>
+                    <Catalogue :id="stringToNumber(product.id)" :title="product.name" :image-src="product.product_image[0].image_url" :price="stringToNumber(product.price)" :is-button-cart-disable="isPopUpShow" @on-tap-cart="onTapCart(product.id)"/>
                 </li>
             </ol>
 
@@ -90,6 +91,60 @@ definePageMeta({
 
 const { isMobile } = useScreen()
 const client = useSupabaseClient<IDatabase>()
+const user = useSupabaseUser()
+
+console.log(user);
+
+const route = useRoute()
+
+onMounted(async () => {
+    if (
+        route.query &&
+        Object.keys(route.query).length > 0 &&
+        route.query.hasOwnProperty('code') &&
+        user.value &&
+        user.value.identities &&
+        user.value.identities.length > 0 &&
+        user.value.identities[0].identity_data &&
+        user.value.identities[0].identity_data['name'] !== undefined &&
+        user.value?.id !== null &&
+        user.value?.email !== null
+    ) {
+            const { count: dataUser, error: errorFetchUser } = await client
+                .from('user')
+                .select('*', { count: 'exact', head: true })
+                .eq('uuid', user.value?.id )
+            console.log('data user = ',dataUser);
+            
+            if(!dataUser || dataUser === 0) {
+                const { error: errorUser } = await client.from('user').insert({ 
+                uuid: user.value?.id,
+                name: user.value.identities[0].identity_data['name'],
+                email: user.value?.email
+                })
+
+                console.log('user = ',errorFetchUser);
+            }
+
+            const { count: dataShoppingSession } = await client
+                .from('shopping_session')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_uuid', user.value?.id )
+
+                console.log('data user ss= ',dataShoppingSession);
+
+            if(!dataShoppingSession && dataShoppingSession === 0) {
+                const { error: errorShoppingSession } = await client.from('shopping_session').insert({ 
+                user_uuid: user.value?.id,
+                total_price: 0
+                })
+                console.log('errorShoppingSession = ',errorShoppingSession);
+            }
+        
+        }
+    }
+)
+
 
 // BEST-SELLER
 const headline = ref<string>(` Welcome to our store | We have a lot of merch design that perhaps suit with your preferences | These are our best seller | `)
@@ -122,8 +177,6 @@ const goRight = () => {
     }
 }
 const changeIsLeftArrow = (x: number) => {
-    console.log(x);
-    
     if (x > 50) {
         isLeftArrow.value = true
     } else {
@@ -166,5 +219,23 @@ const seeMore = () => {
     })
 }
 
+
+// pop up notification
+const isPopUpShow = ref<boolean>(false)
+const onTap = () => {
+    isPopUpShow.value = false
+}
+watch(() => isPopUpShow.value , () => {
+    if(isPopUpShow.value) {
+        setTimeout(() => {
+            isPopUpShow.value = false
+        }, 4000);
+    }
+})
+const onTapCart = (id: string | number) => {
+    console.log('aduh');
+    
+    isPopUpShow.value = true
+}
 
 </script>

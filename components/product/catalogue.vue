@@ -10,7 +10,7 @@
                 Rp.{{ price }}
             </h3>
             <div id="see-more" class="flex w-full justify-end">
-                <button class="flex flex-row items-center gap-2 rounded-md border bg-secondary text-primary font-semibold text-base py-1 px-2 mt-5 mb-3 md:text-xl cursor-pointer" @click="onTapProduct1">
+                <button class="flex flex-row items-center gap-2 rounded-md border bg-secondary text-primary font-semibold text-base py-1 px-2 mt-5 mb-3 md:text-xl cursor-pointer" @click="onTapCart" :disabled="isButtonCartDisable">
                     <span>buy</span>
                     <Icon name="uil:cart" class="font-bold"/>
                 </button>
@@ -20,12 +20,13 @@
 </template>
 
 <script setup lang="ts">
-
+const emit = defineEmits(['onTapCart'])
 const {id, imageSrc, title, price} = defineProps<{
     id: string
     imageSrc: string
     title: string
     price: string
+    isButtonCartDisable?: boolean
 }>()
 
 const onTapProduct = () => {
@@ -33,8 +34,8 @@ const onTapProduct = () => {
         path:   `/product/${id}`,
     })
 }
-const onTapProduct1 = () => {
-    console.log('product1')
+const onTapCart = () => {
+    emit('onTapCart')
 }
 
 </script>

@@ -41,31 +41,39 @@
 <script setup lang="ts">
 definePageMeta({
     layout: 'layout-auth',
-    middleware: ['auth']
+    // middleware: ['auth']
 })
 
 import type { Provider } from '~/node_modules/@supabase/gotrue-js/src/lib/types'
 import type { ISignInForm } from '~/types/pages/auth';
 import type { ITextfieldError } from '~/types/components/textfield';
+import type { IDatabase } from '~/types/database/supabase';
 
-const supabaseClient = useSupabaseClient()
+const supabaseClient = useSupabaseClient<any>()
 const user = useSupabaseUser()
+
+console.log(user);
+
 
 // AUTH
 const loginProvider = async(prov: Provider) => {
     const { data, error } = await supabaseClient.auth.signInWithOAuth({ provider: prov })
+    if (error) {
+        console.log('error = ',error);
+        
+    }
+    
 }
 const loginPassword = async() => {
     const { error } = await supabaseClient.auth.signInWithPassword({
         email: form.email,
         password: form.password,
-    })
+    },)
 
     if (error) {
         error.message = error.message
     }
     isButtonDisable.value = true
-    console.table(form)
 }
 
 const signOut = async ()=> {

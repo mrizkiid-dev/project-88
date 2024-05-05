@@ -13,7 +13,7 @@
                     <TextField title="Password" :is-password="true" place-holder="••••••••••" :is-mandatory="true" v-model="form.password" :error="errorPassword" />
                     <div class="flex flex-col justify-between h-full">
                         <TextField title="WA number" input-type="tel" place-holder="081xxxxxxxxx" v-model="form.waNumber" />
-                        <ButtonDarkMd :disable="isButtonDisable" v-if="!isMobile" title="SignUp" style-css="max-w-[250px] md:min-h-[50px]" @on-click="signUp"/>
+                        <ButtonDarkMd :disable="isButtonDisable" v-if="!isMobile" title="SignUp" style-css="max-w-[250px] md:min-h-[50px] mt-[10px]" @on-click="signUp"/>
                     </div>
                 </div>
                 <div id="form-right" class="flex flex-col w-full gap-3 md:flex-1">
@@ -21,8 +21,8 @@
                         :is-show-drop-down="isShowDropDown.province" :choose="provinces" :loading="isProvinceLoading" @on-tap="onTapProvince" @on-tap-drop-down="onTapDropDownProvince"/>
                     <DropdownForm title="City" v-model="form.city" place-holder="Bandung" empty-warning="province should not be empty"
                         :is-show-drop-down="isShowDropDown.city" :choose="cities" :loading="isCityLoading" @on-tap="onTapCity" @on-tap-drop-down="onTapDropDownCity"/>
-                    <DropdownForm title="District" v-model="form.district" place-holder="Antapani" empty-warning="city should not be empty"
-                        :is-show-drop-down="isShowDropDown.district" :choose="districts" :loading="isDistrictLoading" @on-tap="onTapDistrict" @on-tap-drop-down="onTapDropDownDistrict"/>
+                    <!-- <DropdownForm title="District" v-model="form.district" place-holder="Antapani" empty-warning="city should not be empty"
+                        :is-show-drop-down="isShowDropDown.district" :choose="districts" :loading="isDistrictLoading" @on-tap="onTapDistrict" @on-tap-drop-down="onTapDropDownDistrict"/> -->
                     <TextFieldArea title="Additional Address" :is-mandatory="false" place-holder="hi ka ...." v-model="form.address"/>
                     <ButtonDarkMd :disable="isButtonDisable" v-if="isMobile" title="SignUp" style-css="min-h-[40px] w-full" @on-click="signUp"/>
                 </div>
@@ -76,6 +76,7 @@ import Loading from '~/components/popup/loading.vue';
 import type { ITextfieldError } from '~/types/components/textfield';
 import type { ISignUpForm } from '~/types/pages/auth'
 import type { IChoose, ICity, IDistrict } from  '~/types/components/dropdownForm'
+import type { responseProvince, responseCities } from '~/types/response/responseShipping'
 
 onMounted(() => {
 })
@@ -157,8 +158,24 @@ const onTapProvince = async () => {
         isProvinceLoading.value = true
         form.city = null
         try {
-            const data: IChoose[] = await $fetch('https://mrizkiid-dev.github.io/api-wilayah-indonesia/api/provinces.json',{ method: 'GET' })
-            provinces.value = data
+            // const data: IChoose[] = await $fetch('https://mrizkiid-dev.github.io/api-wilayah-indonesia/api/provinces.json',{ method: 'GET' })
+            const response: responseProvince =  await $fetch('/api/shipping/province',{
+                onResponseError({request, response, options}) {
+                    if (response.status === 400) {
+                        throw response._data
+                    }
+                    if (response.status === 500) {
+                        throw response._data
+                    }
+                },
+                server: false
+            })
+            response.data.forEach(province => {
+                provinces.value.push({
+                    id: province.province_id,
+                    name: province.province
+                })
+            });  
             provinces.value.sort(
                 (a,b) => {
                 let aName = a.name.toLowerCase()
@@ -192,8 +209,27 @@ watch(() => form.province, async () => {
         isCityLoading.value = true
         form.district = null
         try {
-            const data: IChoose[] = await $fetch(`https://mrizkiid-dev.github.io/api-wilayah-indonesia/api/regencies/${form.province.id}.json`,{ method: 'GET' })
-            cities.value = data
+            // const data: IChoose[] = await $fetch(`https://mrizkiid-dev.github.io/api-wilayah-indonesia/api/regencies/${form.province.id}.json`,{ method: 'GET' })
+            const response: responseCities =  await $fetch('/api/shipping/city',{
+                query: {
+                    province: form.province.id
+                },
+                onResponseError({request, response, options}) {
+                    if (response.status === 400) {
+                        throw response._data
+                    }
+                    if (response.status === 500) {
+                        throw response._data
+                    }
+                },
+                server: false
+            })
+            response.data.forEach(city => {
+                cities.value.push({
+                    id: city.city_id,
+                    name: city.type + ' ' + city.city_name
+                })
+            });  
             cities.value.sort(
                 (a,b) => {
                 let aName = a.name.toLowerCase()
@@ -217,36 +253,36 @@ watch(() => form.province, async () => {
 })
 
 // District
-const isDistrictLoading = ref<boolean>(false)
-const districts = ref<IDistrict[]>([])
-watch(() => form.city, async () => {
-    form.district = null
-    if (form.city !== null) {
-        isDistrictLoading.value = true
-        try {
-            const data: IChoose[] = await $fetch(`https://mrizkiid-dev.github.io/api-wilayah-indonesia/api/districts/${form.city.id}.json`,{ method: 'GET' })
-            districts.value = data
-            districts.value.sort(
-                (a,b) => {
-                let aName = a.name.toLowerCase()
-                let bName = b.name.toLowerCase()
+// const isDistrictLoading = ref<boolean>(false)
+// const districts = ref<IDistrict[]>([])
+// watch(() => form.city, async () => {
+//     form.district = null
+//     if (form.city !== null) {
+//         isDistrictLoading.value = true
+//         try {
+//             const data: IChoose[] = await $fetch(`https://mrizkiid-dev.github.io/api-wilayah-indonesia/api/districts/${form.city.id}.json`,{ method: 'GET' })
+//             districts.value = data
+//             districts.value.sort(
+//                 (a,b) => {
+//                 let aName = a.name.toLowerCase()
+//                 let bName = b.name.toLowerCase()
 
-                if (aName < bName) {
-                    return -1
-                }
-                if (aName > bName) {
-                    return 1
-                }
-                return 0
-                }
-            )
-        } catch (error) {
-            console.log(error);
-        } finally {
-            isDistrictLoading.value = false
-        }
-    }
-})
+//                 if (aName < bName) {
+//                     return -1
+//                 }
+//                 if (aName > bName) {
+//                     return 1
+//                 }
+//                 return 0
+//                 }
+//             )
+//         } catch (error) {
+//             console.log(error);
+//         } finally {
+//             isDistrictLoading.value = false
+//         }
+//     }
+// })
 
 //DropDown Logic
 const isShowDropDown = reactive({

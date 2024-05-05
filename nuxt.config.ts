@@ -3,16 +3,9 @@ import { prefix } from "#tailwind-config"
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: { enabled: true },
-  // hooks: {
-  //   "components:dirs": (dirs) => {
-  //     dirs.push(
-  //       {path: '~/components/appbar',},
-  //       {path: '~/components/bottomnav',},
-  //       {path: '~/components/button',},
-  //       {path: '~/components/inputform',prefix: ''},
-  //     )
-  //   }
-  // },
+  runtimeConfig: {
+    rajaOngkirApi: process.env.RAJA_ONGKIR_API
+  },
   components: [
     {
       path: '~/components', 
@@ -39,13 +32,7 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
   ],
   supabase: {
-    // url: process.env.SUPABASE_URL,
-    // key: process.env.SUPABASE_KEY,
-    redirect: false
-    // redirectOptions: {
-    //   login: '/login',
-    //   callback: '/confirm'
-    // }
+    redirect: false,
   },
   googleFonts: {
     families: {
@@ -55,6 +42,11 @@ export default defineNuxtConfig({
     // fontsDir: 'assets/fonts'
   },
   googleSignIn: {
-    clientId: 'CLIENT ID OBTAINED FROM GOOGLE API CONSOLE',
-  }
+    clientId: process.env.GOOGLE_CLIENT_ID
+  },
+  // routeRules: {
+  //   '/auth/login' : {ssr : false},
+  //   '/auth/signup' : {ssr : false},
+  //   '/auth/confirm' : {ssr : false},
+  // }
 })

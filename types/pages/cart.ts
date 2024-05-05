@@ -1,4 +1,4 @@
-export interface ICart {
+export type ICart = {
     id: string,
     imageSrc: string,
     title: string,

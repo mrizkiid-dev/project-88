@@ -58,7 +58,7 @@
                             <div class="bg-white px-2 py-1 shadow-sm cursor-pointer" @click="">
                                 Profile
                             </div>
-                            <div class="bg-white px-2 py-1 shadow-sm cursor-pointer" @click="">
+                            <div class="bg-white px-2 py-1 shadow-sm cursor-pointer" @click="navigateToOrder">
                                 Order
                             </div>
                             <div class="text-third-color flex justify-center mt-4">
@@ -125,5 +125,9 @@ const userDetail = reactive<{
         order: []
     }
 )
+
+const navigateToOrder = () => {
+    navigateTo('/order')
+}
 
 </script>
