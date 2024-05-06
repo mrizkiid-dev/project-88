@@ -10,9 +10,15 @@
                 Rp.{{ price }}
             </h3>
             <div id="see-more" class="flex w-full justify-end">
-                <button class="flex flex-row items-center gap-2 rounded-md border bg-secondary text-primary font-semibold text-base py-1 px-2 mt-5 mb-3 md:text-xl cursor-pointer" @click="onTapCart" :disabled="isButtonCartDisable">
-                    <span>buy</span>
-                    <Icon name="uil:cart" class="font-bold"/>
+                <button 
+                    class="flex flex-row items-center gap-2 rounded-md border font-semibold text-base py-1 px-2 mt-5 mb-3 md:text-xl cursor-pointer" 
+                    :class="[
+                        // { 'bg-gray-darker text-primary' : isButtonCartDisable },
+                        { 'bg-secondary text-primary' : true },
+                    ]"
+                    @click="onTapCart" :disabled="isButtonCartDisable">
+                        <span>buy</span>
+                        <Icon name="uil:cart" class="font-bold"/>
                 </button>
             </div>
         </div>
@@ -21,7 +27,7 @@
 
 <script setup lang="ts">
 const emit = defineEmits(['onTapCart'])
-const {id, imageSrc, title, price} = defineProps<{
+const {id, imageSrc, title, price, isButtonCartDisable} = defineProps<{
     id: string
     imageSrc: string
     title: string
@@ -35,7 +41,9 @@ const onTapProduct = () => {
     })
 }
 const onTapCart = () => {
-    emit('onTapCart')
+    if (!isButtonCartDisable) {
+        emit('onTapCart')
+    }
 }
 
 </script>

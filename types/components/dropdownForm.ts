@@ -19,6 +19,7 @@ export interface IChoose {
 
 export interface ICity extends IChoose {
     province_id?: string
+    postal_code?: string
 }
 
 export interface IDistrict extends IChoose {

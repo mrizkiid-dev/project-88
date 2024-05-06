@@ -1,4 +1,7 @@
 <template>
+    <Teleport v-if="profileStore.isLoading" to="#pop-up">
+        <Loading />
+    </Teleport>
     <header class="bg-secondary w-full h-[400px] md:h-[90vh] flex flex-row pt-[60px] background-grid-homepage">
         <AddtocartNotification :is-show="isPopUpShow" @on-tap="onTap" />
 
@@ -48,7 +51,7 @@
                     </h1>
                 </li>
                 <li v-for="product in bestSeller" :key="product.id" class="relative z-[2]" > 
-                    <Catalogue :id="stringToNumber(product.id)" :title="product.name" :image-src="product.product_image[0].image_url" :price="stringToNumber(product.price)" :is-button-cart-disable="isPopUpShow" @on-tap-cart="onTapCart(product.id)"/>
+                    <Catalogue :id="stringToNumber(product.id)" :title="product.name" :image-src="product.product_image[0].image_url" :price="stringToNumber(product.price)" :is-button-cart-disable="isCartButtonDisable" @on-tap-cart="onTapCart(product.id)"/>
                 </li>
             </ol>
 
@@ -74,7 +77,7 @@
                 lg:grid-cols-4    
             ">
             <li v-for="list in catalogue">
-                <Catalogue :id="stringToNumber(list.id)" :title="list.name" :image-src="list.product_image[0].image_url" :price="stringToNumber(list.price)"/>
+                <Catalogue :id="stringToNumber(list.id)" :title="list.name" :image-src="list.product_image[0].image_url" :price="stringToNumber(list.price)" :is-button-cart-disable="isCartButtonDisable" @on-tap-cart="onTapCart(list.id)"/>
             </li>
         </ol>
         <ButtonDarkMd title="see more ..." styleCss="max-w-[300px] h-[20px]" @onClick="seeMore"/>
@@ -92,12 +95,12 @@ definePageMeta({
 const { isMobile } = useScreen()
 const client = useSupabaseClient<IDatabase>()
 const user = useSupabaseUser()
-
-console.log(user);
+const profileStore = useProfileStore()
 
 const route = useRoute()
 
 onMounted(async () => {
+    profileStore.isLoading = true
     if (
         route.query &&
         Object.keys(route.query).length > 0 &&
@@ -140,11 +143,15 @@ onMounted(async () => {
                 })
                 console.log('errorShoppingSession = ',errorShoppingSession);
             }
-        
+            
+            await profileStore.initProfile()
+
         }
+        profileStore.isLoading = false
     }
 )
 
+console.log('profile store index = ',profileStore.uuid)
 
 // BEST-SELLER
 const headline = ref<string>(` Welcome to our store | We have a lot of merch design that perhaps suit with your preferences | These are our best seller | `)
@@ -232,10 +239,40 @@ watch(() => isPopUpShow.value , () => {
         }, 4000);
     }
 })
-const onTapCart = (id: string | number) => {
-    console.log('aduh');
-    
-    isPopUpShow.value = true
-}
 
+const isCartButtonDisable = ref<boolean>(false)
+const onTapCart = async (id: string | number) => {
+    isCartButtonDisable.value = true
+    if(user.value && user.value.id) {
+        let errorCart: boolean = false
+        const {data , error} = await client.from('shopping_session').select('id').eq('user_uuid',user.value.id)
+
+        if(data && data.length > 0) {
+            const { data: dataSelectProduct, error: errorSelectProduct } = await client.from('cart_item').select('id').eq('product_id', id)
+            if (!dataSelectProduct || (dataSelectProduct && dataSelectProduct.length < 1)) {
+                const { error } = await client.from('cart_item').insert([{
+                    session_id: data[0].id,
+                    product_id: id,
+                    qty: 1
+                }])
+
+                if (error) {
+                    errorCart = true
+                    console.log('aa',error);
+                }
+            }
+
+        if (!error && !errorCart) {
+            isPopUpShow.value = true
+        } else {
+            console.log(error);
+            
+        }
+        
+        } else {
+            navigateTo('/auth/login')
+        }
+    }
+    isCartButtonDisable.value = false
+}
 </script>

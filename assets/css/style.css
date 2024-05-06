@@ -95,3 +95,8 @@ body {
 .scrolling-wrapper {
     -webkit-overflow-scrolling: touch;
   }
+
+input::-ms-reveal,
+input::-ms-clear {
+display: none;
+}

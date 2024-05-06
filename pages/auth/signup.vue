@@ -55,7 +55,7 @@
                 <p>Please try again</p>
             </template>
         </PopSignUp>
-        <Loading v-if="state.loading" />
+        <!-- <Loading v-if="state.loading" /> -->
     </teleport>
 
     <teleport v-if="state.loading" to="#pop-up">
@@ -69,7 +69,6 @@
 
 definePageMeta({
     layout: 'layout-auth',
-    middleware: ['auth']
 })
 
 import Loading from '~/components/popup/loading.vue';
@@ -84,6 +83,7 @@ onMounted(() => {
 const { isMobile } = useScreen()
 const supabaseClient = useSupabaseClient<any>()
 const supabaseUser = useSupabaseUser()
+const profileStore = useProfileStore()
 
 const form = reactive<ISignUpForm>({
     fullname : '',
@@ -125,23 +125,62 @@ const signUp = async () => {
     if (error) {
         isSignUp.failClient.value = false
         state.loading = false
-        console.log('error signup = ',error);
+        alert(error.message)
     } else {
         isSignUp.success = false
-        const { data, error } = await supabaseClient.from('user').insert([
-            { name: form.fullname, email: form.email, province: form.province?.name, city: form.city?.name, district: form.district?.name, additional_address: form.address, whatsapp_number: form.waNumber }
-        ])
-        if(error) {
-            console.log('error = ',error);
-        }
-        if(data) {
-            console.log('data insert = ',data);
+        const user = useSupabaseUser()
+        if (user.value && user.value.id) {
+            const { data, error } = await supabaseClient.from('user').insert([
+            { 
+                uuid: user.value?.id,
+                name: form.fullname,
+                email: form.email,
+            }
+            ])
+
+            if(error) {
+                alert(error.message)
+            } else {
+                console.log('data = ',data);
+                
+                const { error } = await supabaseClient.from('user_address').insert([
+                    { 
+                        whatsapp_number: form.waNumber,
+                        province_id: form.province?.id,
+                        province: form.province?.name,
+                        city_id: form.city?.id,
+                        city: form.city?.name,
+                        additional_address: form.address,
+                        postal_code: form.city?.postal_code
+                    }
+                ])
+                if (error) {
+                    console.log('user_address',error);
+                }
+
+                const { count: dataShoppingSession } = await supabaseClient
+                    .from('shopping_session')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('user_uuid', user.value?.id )
+
+                    console.log('data user ss= ',dataShoppingSession);
+
+                if(!dataShoppingSession && dataShoppingSession === 0) {
+                    const { error: errorShoppingSession } = await supabaseClient.from('shopping_session').insert({ 
+                        user_uuid: user.value?.id,
+                        total_price: 0
+                    })
+                    console.log('errorShoppingSession = ',errorShoppingSession);
+                }
+                await profileStore.initProfile()
+                state.loading = false
+                navigateTo('/')
+            }
+        } else {
             state.loading = false
-            navigateTo('/')
+            alert('something went wrong in the server')
         }
-        state.loading = false
     }
-  
 }
 //pop up
 const closePopUp = () => {
@@ -227,7 +266,8 @@ watch(() => form.province, async () => {
             response.data.forEach(city => {
                 cities.value.push({
                     id: city.city_id,
-                    name: city.type + ' ' + city.city_name
+                    name: city.type + ' ' + city.city_name,
+                    postal_code: city.postal_code
                 })
             });  
             cities.value.sort(
