@@ -3,7 +3,7 @@
         <div class="flex flex-row w-full px-5">
             <div id="left" class="basis-full flex justify-center items-start flex-col">
                 <h3 class="font-medium">{{ title }}</h3>
-                <p class="font-black">Rp. {{ totalPayment }}</p>
+                <p class="font-black">Rp. {{ numberTocurrency(totalPayment) }}</p>
             </div>
             <div id="right" class="basis-full flex items-center justify-center">
                 <ButtonBgYellow :title="titleButton" sytle-css="w-full py-2 border-2 font-semibold" @on-tap="onTap"/>
@@ -13,6 +13,8 @@
 </template>
 
 <script setup lang="ts">
+import { numberTocurrency } from '~/utils/formatter';
+
 const { title, totalPayment, titleButton } = defineProps<{
     title: string,
     totalPayment: number,

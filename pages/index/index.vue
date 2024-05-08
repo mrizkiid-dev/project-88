@@ -98,14 +98,17 @@ const user = useSupabaseUser()
 const profileStore = useProfileStore()
 
 const route = useRoute()
+console.log('xx = ',user.value?.id ?? 'teu aya');
+console.log('cc = ',profileStore.uuid ?? 'teu aya');
 
 onMounted(async () => {
     profileStore.isLoading = true
+    console.log('aaa = ',((profileStore.uuid === null || profileStore.uuid === undefined || profileStore.uuid === '') &&
+        user.value !== null));
+    
     if (
-        route.query &&
-        Object.keys(route.query).length > 0 &&
-        route.query.hasOwnProperty('code') &&
-        user.value &&
+        (profileStore.uuid === null || profileStore.uuid === undefined || profileStore.uuid === '') &&
+        user.value !== null &&
         user.value.identities &&
         user.value.identities.length > 0 &&
         user.value.identities[0].identity_data &&
@@ -139,7 +142,8 @@ onMounted(async () => {
             if(!dataShoppingSession && dataShoppingSession === 0) {
                 const { error: errorShoppingSession } = await client.from('shopping_session').insert({ 
                 user_uuid: user.value?.id,
-                total_price: 0
+                sub_total: 0,
+                total_payment: 0
                 })
                 console.log('errorShoppingSession = ',errorShoppingSession);
             }
@@ -148,6 +152,8 @@ onMounted(async () => {
 
         }
         profileStore.isLoading = false
+        console.log(profileStore.uuid,'=====',profileStore.sessionId);
+        
     }
 )
 
@@ -246,16 +252,20 @@ const onTapCart = async (id: string | number) => {
     if(user.value && user.value.id) {
         let errorCart: boolean = false
         const {data , error} = await client.from('shopping_session').select('id').eq('user_uuid',user.value.id)
-
+        console.log('data = ',data && data.length > 0);
+        
         if(data && data.length > 0) {
-            const { data: dataSelectProduct, error: errorSelectProduct } = await client.from('cart_item').select('id').eq('product_id', id)
+            const { data: dataSelectProduct, error: errorSelectProduct } = await client.from('cart_item').select('id').eq('product_id', id).eq('session_id', data[0].id)
+            console.log(dataSelectProduct);
+            
             if (!dataSelectProduct || (dataSelectProduct && dataSelectProduct.length < 1)) {
                 const { error } = await client.from('cart_item').insert([{
                     session_id: data[0].id,
                     product_id: id,
                     qty: 1
                 }])
-
+                console.log('kena');
+                
                 if (error) {
                     errorCart = true
                     console.log('aa',error);

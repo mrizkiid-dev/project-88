@@ -16,16 +16,19 @@ export const useProfileStore = defineStore('profile-store', {
             district: '' as string,
             additionalAddress: '' as string,
             cart: [] as ICart[],
+            subTotal: 0 as number,
             totalPayment: 0 as number 
         }
     },
     actions: {
         async initCart() {
             try {
+                this.cart = []
                 if (this.sessionId !== '') {
-                    const {data , error} = await useSupabaseClient<IDatabase>().from('cart_item').select(`id,qty,product(name,price,product_image(image_url))`).eq('session_id',this.sessionId).returns<{id: any;
+                    const {data , error} = await useSupabaseClient<IDatabase>().from('cart_item').select(`id,qty,product(id,name,price,product_image(image_url))`).eq('session_id',this.sessionId).returns<{id: any;
                         qty: any;
                         product: {
+                            id: any
                             name: any;
                             price: any;
                             product_image: {
@@ -41,7 +44,8 @@ export const useProfileStore = defineStore('profile-store', {
                             console.log('cart = ',cart);
                             
                             cart_temp = {} as ICart
-                            cart_temp.id = cart.id
+                            cart_temp.id = cart.id,
+                            // cart_temp.productId = cart.product.id
                             cart_temp.title = cart.product.name
                             cart_temp.price = cart.product.price
                             cart_temp.quantity = cart.qty
@@ -61,26 +65,29 @@ export const useProfileStore = defineStore('profile-store', {
         },
         async initProfile() {
             try {
-                const {data , error} = await useSupabaseClient<IDatabase>().from('user').select(`uuid,name,email,shopping_session(id,total_price),user_address(whatsapp_number,province,city,district,additional_address)`).eq('uuid',useSupabaseUser().value?.id).limit(1)
-                if (error) {
-                    throw new Error(JSON.stringify(error));
-                }
+                if (useSupabaseUser().value?.id !== undefined) {
+                    const {data , error} = await useSupabaseClient<IDatabase>().from('user').select(`uuid,name,email,shopping_session(id,sub_total,total_payment),user_address(whatsapp_number,province,city,district,additional_address)`).eq('uuid',useSupabaseUser().value?.id).limit(1)
+                    if (error) {
+                        throw new Error(JSON.stringify(error));
+                    }
 
-                if (data !== null && data.length > 0 && error === null) {
-                    console.log('it is happen');
-                    
-                    this.uuid = data[0].uuid
-                    this.sessionId = data[0].shopping_session[0].id
-                    this.name = data[0].shopping_session[0].id
-                    this.email = data[0].email
-                    this.totalPayment = data[0].shopping_session[0].total_price
+                    if (data !== null && data.length > 0 && error === null) {
+                        console.log('it is happen');
+                        
+                        this.uuid = data[0].uuid
+                        this.sessionId = data[0].shopping_session[0].id
+                        this.name = data[0].shopping_session[0].id
+                        this.email = data[0].email
+                        this.subTotal = data[0].shopping_session[0].sub_total
+                        this.totalPayment = data[0].shopping_session[0].total_payment
 
-                    if ('user_address' in data && isArray(data.user_address) && data.user_address.length > 0) {
-                        this.phoneNumber = data[0].user_address[0].whatsapp_number
-                        this.province = data[0].user_address[0].province ?? ''
-                        this.city = data[0].user_address[0].city ?? ''
-                        this.district = data[0].user_address[0].district ?? ''
-                        this.additionalAddress = data[0].user_address[0].additional_address ?? ''
+                        if ('user_address' in data && isArray(data.user_address) && data.user_address.length > 0) {
+                            this.phoneNumber = data[0].user_address[0].whatsapp_number
+                            this.province = data[0].user_address[0].province ?? ''
+                            this.city = data[0].user_address[0].city ?? ''
+                            this.district = data[0].user_address[0].district ?? ''
+                            this.additionalAddress = data[0].user_address[0].additional_address ?? ''
+                        }
                     }
                 }
 

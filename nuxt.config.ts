@@ -44,9 +44,11 @@ export default defineNuxtConfig({
   googleSignIn: {
     clientId: process.env.GOOGLE_CLIENT_ID
   },
-  // routeRules: {
-  //   '/auth/login' : {ssr : false},
-  //   '/auth/signup' : {ssr : false},
-  //   '/auth/confirm' : {ssr : false},
-  // }
+  routeRules: {
+    '/auth/login' : {ssr : false},
+    '/auth/signup' : {ssr : false},
+    '/auth/confirm' : {ssr : false},
+    '/cart' : {ssr : false},
+    '/order' : {ssr : false},
+  }
 })

@@ -168,7 +168,8 @@ const signUp = async () => {
                 if(!dataShoppingSession && dataShoppingSession === 0) {
                     const { error: errorShoppingSession } = await supabaseClient.from('shopping_session').insert({ 
                         user_uuid: user.value?.id,
-                        total_price: 0
+                        sub_total: 0,
+                        total_payment: 0
                     })
                     console.log('errorShoppingSession = ',errorShoppingSession);
                 }

@@ -1,6 +1,9 @@
 <template>
   <main v-if="isMobile">
-    <section v-if="profileStore.cart.length > 0" class="pt-[60px]">
+    <section v-if="profileStore.isLoading">
+      <Loading />
+    </section>
+    <section v-else-if="profileStore.cart.length > 0 && !profileStore.isLoading" class="pt-[60px]">
       <div class="flex flex-row items-center gap-3 pl-4 w-full h-[40px] border-b-[1px] fixed z-50 bg-third-color">
         <input type="checkbox" id="all-check" v-model="isAllCheck" class="checked:bg-primary">
         <label for="all-check"> Select all products </label>
@@ -8,7 +11,7 @@
       <form @submit.prevent class="py-[80px] px-4">
         <ol class="flex flex-col gap-4">
           <CartCard v-for="cart in profileStore.cart"
-            :id="cart.id"
+            :id="cart.id.toString()"
             :image-src="cart.imageSrc"
             :title="cart.title"
             :price="cart.price*cart.quantity"
@@ -20,7 +23,7 @@
             :key="cart.id"
           />
         </ol>
-        <BottomNavTransaction title="Total Payments" :total-payment="userTransactionStore.totalPayment" title-button="checkout" @on-tap="submit"/>
+        <BottomNavTransaction title="Total Payments" :total-payment="profileStore.totalPayment" title-button="checkout" @on-tap="submit"/>
       </form>
     </section>
 
@@ -31,12 +34,15 @@
   </main>
 
   <main v-else >
-    <section v-if="profileStore.cart.length > 0" class="pt-[100px] pb-[60px] flex flex-col items-center gap-20 bg-gray-v1">
+    <section v-if="profileStore.isLoading">
+      <Loading />
+    </section>
+    <section v-else-if="profileStore.cart.length > 0 && !profileStore.isLoading" class="pt-[100px] pb-[60px] flex flex-col items-center gap-20 bg-gray-v1">
       <h1 class="px-2 py-1 bg-primary font-semibold text-xl text-third-color inline-block">Cart</h1>
       <div class="container max-w-[1337px] flex flex-row gap-4">
         <div id="left" class="flex-grow-[9] px-4 py-6 bg-third-color border flex flex-col rounded-md shadow-[4px_4px_4px_0px_#9C9C9C40]">
           <div class="flex flex-row justify-between">
-            <h2 class="text-2xl font-semibold">Shopping Cart ({{ userTransactionStore.cartItems.length }})</h2>
+            <h2 class="text-2xl font-semibold">Shopping Cart ({{ profileStore.cart.length }})</h2>
           </div>
           <!-- <div id="select-all" class="flex flex-row items-baseline gap-2">
               <input type="checkbox" v-model="isAllCheck">
@@ -73,12 +79,12 @@
                 <strong @click="increment(cart)" class="text-xl cursor-pointer select-none">+</strong>
               </div>
               <div id="price" class="flex-grow-[1] max-w-[120px] flex-center">
-                <p>{{ cart.price }}</p>
+                <p>Rp. {{ numberTocurrency(cart.price) }}</p>
               </div>
               <div id="total" class="flex-grow-[1] max-w-[120px] flex-center">
-                <p>{{ (cart.price * cart.quantity) }}</p>
+                <p class="text-ellipsis inline-block whitespace-nowrap">Rp. {{numberTocurrency (cart.price * cart.quantity) }}</p>
               </div>
-              <div class="flex-grow-[1] flex max-w-5 items-center justify-center">
+              <div class="flex-grow-[1] flex max-w-5 items-center justify-center cursor-pointer" @click="deleteCart(cart)">
                 x
               </div>
             </div>
@@ -89,12 +95,12 @@
           <div class="my-[20px]">
             <div class="flex justify-between text-base">
               <p>Sub Total</p>
-              <strong>Rp. {{ userTransactionStore.totalPayment }}</strong>
+              <strong>Rp. {{ numberTocurrency(profileStore.totalPayment) }}</strong>
             </div>
             <div class="border my-2" />
             <div class="text-xl flex justify-between">
               <strong>Total</strong>
-              <strong>Rp. {{ userTransactionStore.totalPayment }}</strong>
+              <strong>Rp. {{ numberTocurrency(profileStore.totalPayment) }}</strong>
             </div>
           </div>
           <!-- <div class="flex justify-center mt-[150px]">
@@ -126,9 +132,13 @@ definePageMeta({
 // useAsyncData('initCart',async () => await profileStore.initCart())
 
 onMounted(async () => {
+  profileStore.isLoading = true
   if (!profileStore.uuid) {
     await profileStore.initProfile()
+  } else {
+    await profileStore.initCart()
   }
+  profileStore.isLoading = false
 })
 
 const { isMobile } = useScreen()
@@ -183,13 +193,20 @@ const decrement = (item: ICart) => {
     }
   }
 }
-const deleteCart = (item: ICart) => {
+const deleteCart = async (item: ICart) => {
   const position = profileStore.cart.indexOf(item)
   profileStore.cart.splice(position,1)
 
   // delete cheked if check true before deleted
   const positionCheck = checked.value.indexOf(item.id)
   checked.value.splice(positionCheck,1)
+  
+  const { error } = await useSupabaseClient()
+  .from('cart_item')
+  .delete()
+  .eq('id', item.id)
+
+  console.log('error cart= ',error);
   
 }
 

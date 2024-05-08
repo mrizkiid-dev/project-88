@@ -89,6 +89,7 @@
 <script setup lang="ts">
 const supabaseClient = useSupabaseClient()
 const user = useSupabaseUser()
+const profileStore = useProfileStore()
 
 const { searchResult } = defineProps<{
     searchResult?: any
@@ -98,6 +99,7 @@ const isSearching = ref<boolean>(true)
 const isProfileShow = ref<boolean>(false)
 
 const signOut = async () => {
+    profileStore.$reset()
     const { error } = await supabaseClient.auth.signOut()
 }
 const signIn = async () => {
