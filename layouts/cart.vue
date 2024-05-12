@@ -16,7 +16,6 @@ const store = useAppStore()
 const { isMobile } = useScreen()
 store.isMobile = isMobile
 
-const userTransactionStore = useUserTransactionStore()
 
 
 </script>

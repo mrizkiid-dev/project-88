@@ -20,6 +20,9 @@ export const useProfileStore = defineStore('profile-store', {
             totalPayment: 0 as number 
         }
     },
+    // getters: {
+        
+    // },
     actions: {
         async initCart() {
             try {
@@ -95,6 +98,7 @@ export const useProfileStore = defineStore('profile-store', {
             } catch (error) {
                 console.log('error initProfile = ',error);
             }
-        }
+        },
+
     },
 })

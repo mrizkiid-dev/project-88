@@ -1,6 +1,6 @@
 <template>
     <li class="flex flex-row items-start border px-2 py-4 gap-2 rounded-lg shadow-[0px_4px_4px_0px_#CACACA40]">
-        <input type="checkbox" :id="id" :value="id" v-model="checked" :disabled="quantity === 0">
+        <input type="checkbox" :id="id?.toString()" :value="id" v-model="checked" :disabled="quantity === 0" @click="onClickCheckbox">
         <div><img :src="imageSrc" :alt="title" width="60px" height="60px" class="rounded-md"></div>
         <div class="flex flex-col gap-1 w-full">
             <h2 class="text-ellipsis line-clamp-1 text-xl font-semibold p-0 m-0">{{ title }}</h2>
@@ -26,10 +26,10 @@ const emit = defineEmits<{
     increase: [],
     decrease: [],
     deleteCart: [],
+    click: []
 }>()
-const userTransactionStore = useUserTransactionStore()
 
-const checked = defineModel<string[]>('checked')
+const checked = defineModel<number[]>('checked')
 
 const increase = () => {
     emit('increase')
@@ -40,5 +40,9 @@ const decrease = () => {
 
 const deleteCart = () => {
     emit('deleteCart')
+}
+
+const onClickCheckbox = () => {
+    emit('click')
 }
 </script>

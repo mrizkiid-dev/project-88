@@ -11,7 +11,7 @@
       <form @submit.prevent class="py-[80px] px-4">
         <ol class="flex flex-col gap-4">
           <CartCard v-for="cart in profileStore.cart"
-            :id="cart.id.toString()"
+            :id="cart.id"
             :image-src="cart.imageSrc"
             :title="cart.title"
             :price="cart.price*cart.quantity"
@@ -20,6 +20,7 @@
             @increase="increment(cart)"
             @decrease="decrement(cart)"
             @delete-cart="deleteCart(cart)"
+            @click="onTapChecBox(cart)"
             :key="cart.id"
           />
         </ol>
@@ -34,9 +35,9 @@
   </main>
 
   <main v-else >
-    <section v-if="profileStore.isLoading">
+    <teleport v-if="profileStore.isLoading" to="#pop-up">
       <Loading />
-    </section>
+    </teleport>
     <section v-else-if="profileStore.cart.length > 0 && !profileStore.isLoading" class="pt-[100px] pb-[60px] flex flex-col items-center gap-20 bg-gray-v1">
       <h1 class="px-2 py-1 bg-primary font-semibold text-xl text-third-color inline-block">Cart</h1>
       <div class="container max-w-[1337px] flex flex-row gap-4">
@@ -68,7 +69,7 @@
             </div>
           </div>
           <div v-for="cart in profileStore.cart" :key="cart.id" class="flex flex-row gap-2">
-            <input type="checkbox" :value="cart.id" v-model="checked"/>
+            <input type="checkbox" :value="cart.id" v-model="checked" @click="onTapChecBox(cart)"/>
             <div class="flex flex-row w-full p-2 border mt-2 font-semibold">
               <div id="product-details" class="flex-grow-[4] max-w-[650px]">
                 <img src="/img/products/product-example-1.png" width="60px" height="60px" class="rounded-md"/>
@@ -95,7 +96,7 @@
           <div class="my-[20px]">
             <div class="flex justify-between text-base">
               <p>Sub Total</p>
-              <strong>Rp. {{ numberTocurrency(profileStore.totalPayment) }}</strong>
+              <strong>Rp. {{ numberTocurrency(profileStore.subTotal) }}</strong>
             </div>
             <div class="border my-2" />
             <div class="text-xl flex justify-between">
@@ -107,7 +108,7 @@
             <ButtonBgYellow title="checkout" sytle-css="px-12 py-1" @on-tap="submit"/>
           </div> -->
           <div class="absolute bottom-0 flex justify-center w-full -ml-4 pb-3 px-4">
-            <ButtonBgYellow title="Place Order" sytle-css=" w-full py-1 " @on-tap="submit"/>
+            <ButtonBgYellow title="Checkout" sytle-css=" w-full py-1 " @on-tap="submit" :disabled="isCheckoutBtnDisable"/>
           </div>
         </div>
       </div>
@@ -121,15 +122,16 @@
 </template>
 
 <script setup lang="ts">
-import { useUserTransactionStore } from '~/stores/user-transaction';
 import type { ICart } from '~/types/pages/cart';
+import type { TCheckout } from '~/types/checkout';
+import { useUserCheckout } from '~/stores/checkout';
 
 definePageMeta({
   layout: 'cart',
   middleware: 'auth'
 });
 
-// useAsyncData('initCart',async () => await profileStore.initCart())
+const checkoutStore = useUserCheckout()
 
 onMounted(async () => {
   profileStore.isLoading = true
@@ -143,18 +145,18 @@ onMounted(async () => {
 
 const { isMobile } = useScreen()
 
-const userTransactionStore = useUserTransactionStore()
 const profileStore = useProfileStore()
 
 const isAllCheck = ref<boolean>(false)
+const checked = ref<number[]>([])
 watch(isAllCheck, () => {
-  profileStore.totalPayment = 0
+  profileStore.subTotal = 0
   if(isAllCheck.value) {
     profileStore.cart.forEach((item) => {
       if(item.quantity > 0) {
         checked.value.push(item.id)
         item.checked = true
-        profileStore.totalPayment += (item.price * item.quantity) 
+        profileStore.subTotal += (item.price * item.quantity) 
       } 
     })
   } else {
@@ -163,33 +165,40 @@ watch(isAllCheck, () => {
     })
     checked.value = []
   }
+  profileStore.totalPayment = profileStore.subTotal
 })
 
-const checked = ref<string[]>([])
 watch(checked, () => {
-  profileStore.totalPayment = 0
+  profileStore.subTotal = 0
   console.log('checked value = ',checked.value);
   
   profileStore.cart.forEach(item => {
     checked.value.forEach(check => {
       if (item.id === check) {
-        profileStore.totalPayment += (item.price * item.quantity)
+        profileStore.subTotal += (item.price * item.quantity)
       }
     })
   })
+
+  profileStore.totalPayment = profileStore.subTotal
 },{ deep: true })
+const onTapChecBox = (cart: ICart) => {
+  cart.checked = !cart.checked
+}
 
 const increment = (item: ICart) => {
   item.quantity = item.quantity + 1;
   if ( checked.value.find((e) => {return e === item.id}) ) {
-    profileStore.totalPayment += item.price
+    profileStore.subTotal += item.price
+    profileStore.totalPayment = profileStore.subTotal
   }
 }
 const decrement = (item: ICart) => {
   if (item.quantity > 1) {
     item.quantity = item.quantity - 1;
     if ( checked.value.find((e) => {return e === item.id}) ) {
-      profileStore.totalPayment -= item.price
+      profileStore.subTotal -= item.price
+      profileStore.totalPayment = profileStore.subTotal
     }
   }
 }
@@ -210,29 +219,32 @@ const deleteCart = async (item: ICart) => {
   
 }
 
+const isCheckoutBtnDisable = computed(() => {
+  return checked.value.length < 1
+})
+
 const submit = () => {
-
-  profileStore.cart.forEach(item => {
-      item.checked = false
-    })
-  checked.value.forEach(check => {
-    profileStore.cart.forEach(item => {
-      if(check === item.id) {
-        item.checked = true
-      }
-    })
-  })
-
   const result = profileStore.cart.filter(item => {
     return item.checked
   })
 
-  console.log('submit = ',result);
+  checkoutStore.products = []
+  checkoutStore.subTotal = profileStore.subTotal
+  checkoutStore.totalPayment = profileStore.totalPayment
+  let checkoutItem : TCheckout
+  result.forEach(cart => {
+    checkoutItem = {} as TCheckout
+    checkoutItem.id = cart.id
+    checkoutItem.title = cart.title
+    checkoutItem.imageSrc = cart.imageSrc
+    checkoutItem.qty = cart.quantity
+    checkoutItem.price = cart.price
+    checkoutStore.products.push(checkoutItem)
+  })
+
+  navigateTo('/checkout')
   
 }
-
-
-
 
 </script>
 

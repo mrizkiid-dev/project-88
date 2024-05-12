@@ -4,7 +4,7 @@ export const rupiahFormatter = new Intl.NumberFormat('id-ID', {
     currency: 'IDR'
 });
 
-export const currencyTonumber = (v: string): number => {
+export const currencyTonumber = (v: string | null | undefined): number => {
     if (!v) { 
         return 0 
     }
@@ -13,8 +13,8 @@ export const currencyTonumber = (v: string): number => {
     return Number(v.replace(/[^0-9.]/g, ""))
 }
 
-export const numberTocurrency = (v: number): string => {
-    if (v === 0) { 
+export const numberTocurrency = (v: number | null | undefined): string => {
+    if (v === 0 || v === null || v === undefined) { 
         return '0' 
     }
     const formattedValue = v.toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")

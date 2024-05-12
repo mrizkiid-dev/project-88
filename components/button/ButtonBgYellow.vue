@@ -1,5 +1,10 @@
 <template>
-    <button :disabled="disabled" @click="onTap" class="bg-secondary border border-primary rounded-md text-primary " :class="sytleCss">
+    <button :disabled="disabled" @click="onTap" class="rounded-md text-primary " 
+            :class="[
+                sytleCss,
+                {'bg-gray-darker': disabled}, 
+                {'bg-secondary border border-primary': !disabled}
+            ]">
         {{ title }}
         <slot>
             

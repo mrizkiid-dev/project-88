@@ -1,26 +1,46 @@
 <template>
-  <main class="pt-[100px] pb-[90px] px-2 flex flex-col items-center gap-10 bg-gray-v1 md:gap-20">
+  <main class="pt-[100px] pb-[90px] px-4 flex flex-col items-center gap-10 bg-gray-v1 md:gap-20 md:px-2">
     <h1 class="px-3 py-1 bg-primary font-semibold text-2xl text-third-color inline-block tracking-wider">
       <span v-if="isMobile">Summary</span>
       <span v-else>Checkout</span>
     </h1>
+
+    <teleport v-if="isShowModalAddress" to="#pop-up">
+      <div class="fixed z-[99] w-screen h-screen bg-[#abaaaa80] cursor-pointer flex items-center justify-center" @click.self="onCloseModalAddress">
+        <form class="bg-third-color rounded-xl min-w-[300px] h-[700px] flex flex-col p-5 overflow-y-scroll scroll-radius gap-3 md:min-w-[600px]" @submit.prevent="submitAddress">
+          <h1 class="flex justify-center font-black tracking-wider text-2xl mb-10">Address</h1>
+          <TextField title="phone number" place-holder="089xxxxxxxxx" input-type="tel" :is-mandatory="true" v-model="formAddress.telephone"/>
+          <DropdownForm title="province" place-holder="Jawa Barat" :is-mandatory="true" v-model="formAddress.province"
+            :is-show-drop-down="isShowDropDown.province" :choose="provinces" :loading="isProvinceLoading" @on-tap="onTapProvince" @on-tap-drop-down="onTapDropDownProvince"/>
+          <DropdownForm title="City" v-model="formAddress.city" place-holder="Bandung" :is-mandatory="true" empty-warning="province should not be empty"
+            :is-show-drop-down="isShowDropDown.city" :choose="cities" :loading="isCityLoading" @on-tap="onTapCity" @on-tap-drop-down="onTapDropDownCity"/>
+          <TextFieldArea title="Additional Address" :is-mandatory="false" place-holder="hi ka ...." v-model="formAddress.address"/>
+          <ButtonDarkMd :disable="isButtonDisable" title="SignUp" style-css="min-h-[40px] w-full"/>
+        </form>
+      </div>
+    </teleport>
+
     <div class="container max-w-[1337px] flex flex-row gap-4">
       <div id="left" class="flex-grow-[9] flex flex-col gap-4">
         <div id="address"
           class="flex flex-col gap-2 px-4 py-6 bg-third-color border rounded-md shadow-[4px_4px_4px_0px_#9C9C9C40] order-2 md:order-1">
-          <h2 class="text-2xl font-bold tracking-wide">Shipping Address</h2>
-          <button
-            class="flex flex-row bg-primary items-center justify-center gap-2 text-third-color py-1 px-2 max-w-[150px] rounded-lg"
-            @click="addAddress">
-            <div v-if="!isAddressShow">
-              <Icon name="ic:round-plus" />
-              <span>add address</span>
-            </div>
-            <div v-else>
-              <Icon name="ic:round-plus" />
-              <span>update address</span>
-            </div>
-          </button>
+          <h2 class="text-lg font-bold tracking-wide md:text-2xl">Shipping Address</h2>
+          <div>
+            <button v-if="!isAddressShow"
+              class="flex flex-row bg-primary items-center justify-center gap-2 text-third-color py-1 px-2 min-w-[150px] rounded-lg text-base md:text-lg"
+              @click="onAddAddress">
+                <Icon name="ic:round-plus" />
+                <span>add address</span>
+            </button>
+            <button v-else
+              class="flex flex-row bg-primary items-center justify-center gap-2 text-third-color py-1 px-2 min-w-[150px] rounded-lg text-base md:text-lg"
+              @click="onUpdateAddress">
+              <div>
+                <Icon name="ic:round-plus" />
+                <span>update address</span>
+              </div>
+            </button>
+          </div>
           <div v-if="isAddressShow" class="py-5 border-t-[1px] mt-5 flex flex-col">
             <strong>Delivery Address</strong>
             <div class="flex flex-col max-w-[400px] text-sm mt-3">
@@ -34,10 +54,6 @@
                 <p>{{ user.address }}</p>
               </div>
               <div class="flex flex-row gap-2 items-center w-full">
-                <p>District : </p>
-                <p>{{ user.district }}</p>
-              </div>
-              <div class="flex flex-row gap-2 items-center w-full">
                 <p>City : </p>
                 <p>{{ user.city }}</p>
               </div>
@@ -45,24 +61,27 @@
                 <p>Province : </p>
                 <p>{{ user.province }}</p>
               </div>
+              <div class="flex flex-row gap-2 items-center w-full">
+                <p>Phone Number : </p>
+                <p>{{ user.phoneNumber }}</p>
+              </div>
             </div>
           </div>
         </div>
-        <div id="checkout"
-          class="px-8 py-6 bg-third-color border rounded-md shadow-[4px_4px_4px_0px_#9C9C9C40] flex flex-col gap-5 order-1 md:order-2">
-          <div id="checkout-items" v-for="product in products" :key="product.id"
-            class="flex flex-row items-center p-3 shadow-[4px_4px_4px_0px_#9C9C9C40] gap-2">
-            <div class="">
-              <img :src="imageSrc" width="80px" class="rounded-md overflow-clip">
-            </div>
 
-            <div class="flex flex-col p-3">
+        <div id="checkout"
+          class="p-4 bg-third-color border rounded-md shadow-[4px_4px_4px_0px_#9C9C9C40] flex flex-col gap-5 order-1 md:order-2 md:px-8 md:py-6">
+          <div id="checkout-items" v-for="product in checkoutStore.products" :key="product.id"
+            class="flex flex-row items-center px-3 shadow-[4px_4px_4px_0px_#9C9C9C40] gap-2 md:p-3">
+            <img :src="product.imageSrc" :width="isMobile ? `60px` : `80px`" class="rounded-md overflow-clip">
+            <div class="flex flex-col p-3 text-sm md:text-xl">
               <h4 class="font-semibold">{{ product.title }}</h4>
               <p class="">{{ product.qty }} Pcs</p>
-              <p>{{ product.price }}</p>
+              <p>Rp. {{ numberTocurrency(product.price * product.qty) }}</p>
             </div>
           </div>
         </div>
+
       </div>
 
       <!-- Desktop only -->
@@ -74,15 +93,15 @@
           <div class="mt-4 flex flex-col">
             <div class="flex justify-between">
               <p>Sub total</p>
-              <strong>Rp {{ subTotal }}</strong>
+              <strong>Rp {{ numberTocurrency(checkoutStore.subTotal) }}</strong>
             </div>
-            <div class="flex justify-between">
+            <!-- <div class="flex justify-between">
               <p>Discount</p>
               <strong>- Rp {{ discount }}</strong>
-            </div>
+            </div> -->
             <div class="flex justify-between">
-              <p>Total Shipping</p>
-              <strong>Rp {{ shippingPrice }}</strong>
+              <p>Shipping</p>
+              <strong>Rp {{ numberTocurrency(checkoutStore.shipping.price) }}</strong>
             </div>
           </div>
 
@@ -90,7 +109,7 @@
 
           <div class="py-2 flex flex-row font-bold text-xl justify-between">
             <p>Total</p>
-            <p>Rp {{ totalPayments }}</p>
+            <p>Rp {{ numberTocurrency(checkoutStore.totalPayment) }}</p>
           </div>
 
           <div class="absolute bottom-0 flex justify-center w-full -ml-4 pb-3 px-4">
@@ -113,75 +132,205 @@
 
 <script setup lang="ts">
 definePageMeta({
-  layout: 'checkout'
+  layout: 'checkout',
+  middleware: 'checkout'
 })
+
+import { useUserCheckout } from '~/stores/checkout';
+import type { IChoose, ICity } from '~/types/components/dropdownForm'
+import type { ISignUpForm } from '~/types/pages/auth'
+import type { ITextfieldError } from '~/types/components/textfield';
+import type { responseCities, responseProvince } from '~/types/response/responseShipping';
+import type { TAddress } from '~/types/components/address'
 
 const { isMobile } = useScreen()
 
-const addAddress = () => {
-  revertBoolean(isAddressShow)
+const checkoutStore = useUserCheckout()
+const profileStore = useProfileStore()
+
+const isShowModalAddress = ref<boolean>(false)
+const onAddAddress = () => {
+  revertBoolean(isShowModalAddress)
 }
 
-const isAddressShow = ref<boolean>(false)
-
-const revertBoolean = (input: globalThis.Ref<boolean>) => {
-  input.value = !input.value
+const onUpdateAddress = () => {
+  revertBoolean(isShowModalAddress)
 }
+const onCloseModalAddress = () => {
+  isShowModalAddress.value = false
+  onDestroyModalAddress()
+}
+
+
+const isAddressShow = computed(() => {
+  return profileStore.province.name !== null && profileStore.province.name !== undefined && profileStore.province.name !== ''
+})
 
 const user = {
-  name: 'muhammad rizki',
-  address: 'Jl. Tangen',
-  district: 'Tangen',
-  city: 'Sragen',
-  province: 'Jawa Tengah'
+  name: profileStore.name,
+  address: profileStore.additionalAddress,
+  city: profileStore.city,
+  province: profileStore.province,
+  phoneNumber: profileStore.phoneNumber
 }
 
-const imageSrc = ref<string>('/img/products/product-example-1.png')
-const title = ref<string>('Product Title 1')
-const qty = ref<string>('')
-
-const products = [
-  {
-    id: '1',
-    imageSrc: '/img/products/product-example-1.png',
-    title: 'Product Title 1',
-    qty: 10,
-    price: 'Rp. 99999999'
-  },
-  {
-    id: '2',
-    imageSrc: '/img/products/product-example-1.png',
-    title: 'Product Title 2',
-    qty: 12,
-    price: 'Rp. 99999999'
-  },
-  {
-    id: '3',
-    imageSrc: '/img/products/product-example-1.png',
-    title: 'Product Title 3',
-    qty: 13,
-    price: 'Rp. 99999999'
-  },
-  {
-    id: '14',
-    imageSrc: '/img/products/product-example-1.png',
-    title: 'Product Title 4',
-    qty: 14,
-    price: 'Rp. 99999999'
-  },
-  {
-    id: '15',
-    imageSrc: '/img/products/product-example-1.png',
-    title: 'Product Title 15',
-    qty: 15,
-    price: 'Rp. 99999999'
-  },
-]
 
 const subTotal = ref<string>('99999999')
 const discount = ref<string>('10000')
 const shippingPrice = ref<string>('900000')
 const totalPayments = ref<number>(99989000)
+
+const formAddress = reactive<TAddress>({
+  telephone: '',
+  province: null,
+  city : null,
+  address : '',
+})
+
+//province
+const isProvinceLoading = ref<boolean>(false)
+const provinces = ref<IChoose[]>([])
+const onTapProvince = async () => {
+    if (provinces.value.length === 0) {
+        isProvinceLoading.value = true
+        formAddress.city = null
+        try {
+            const response: responseProvince =  await $fetch('/api/shipping/province',{
+                onResponseError({request, response, options}) {
+                    if (response.status === 400) {
+                        throw response._data
+                    }
+                    if (response.status === 500) {
+                        throw response._data
+                    }
+                },
+                server: false
+            })
+            response.data.forEach(province => {
+                provinces.value.push({
+                    id: province.province_id,
+                    name: province.province
+                })
+            });  
+            provinces.value.sort(
+                (a,b) => {
+                let aName = a.name.toLowerCase()
+                let bName = b.name.toLowerCase()
+
+                if (aName < bName) {
+                    return -1
+                }
+                if (aName > bName) {
+                    return 1
+                }
+                return 0
+                }
+            )
+        } catch (error) {
+            console.log(error);
+        } finally {
+            isProvinceLoading.value = false
+        }
+    }
+    dropDownProvince()
+}
+
+// City
+const isCityLoading = ref<boolean>(false)
+const cities = ref<ICity[]>([])
+watch(() => formAddress.province, async () => {
+    formAddress.city = null
+    if (formAddress.province) {
+        isCityLoading.value = true
+        try {
+            const response: responseCities =  await $fetch('/api/shipping/city',{
+                query: {
+                    province: formAddress.province.id
+                },
+                onResponseError({request, response, options}) {
+                    if (response.status === 400) {
+                        throw response._data
+                    }
+                    if (response.status === 500) {
+                        throw response._data
+                    }
+                },
+                server: false
+            })
+            response.data.forEach(city => {
+                cities.value.push({
+                    id: city.city_id,
+                    name: city.type + ' ' + city.city_name,
+                    postal_code: city.postal_code
+                })
+            });  
+            cities.value.sort(
+                (a,b) => {
+                let aName = a.name.toLowerCase()
+                let bName = b.name.toLowerCase()
+
+                if (aName < bName) {
+                    return -1
+                }
+                if (aName > bName) {
+                    return 1
+                }
+                return 0
+                }
+            )
+        } catch (error) {
+            console.log(error);
+        } finally {
+            isCityLoading.value = false
+        }
+    }
+})
+
+//DropDown Logic
+const isShowDropDown = reactive({
+    province: false,
+    city: false,
+})
+
+const onTapDropDownProvince = () => {
+    isShowDropDown.province = false
+}
+const onTapDropDownCity = () => {
+    isShowDropDown.city = false
+}
+
+const dropDownProvince = () => {
+    isShowDropDown.province = !isShowDropDown.province
+    isShowDropDown.city = false
+}
+const onTapCity = () => {
+    isShowDropDown.province = false
+    isShowDropDown.city = !isShowDropDown.city
+}
+
+const isButtonDisable = computed<boolean>(() => {
+    if (
+      formAddress.telephone && formAddress.telephone !== '' &&
+      formAddress.province && formAddress.province.id && formAddress.province.name !== '' &&
+      formAddress.city && formAddress.city.id && formAddress.city.name !== '' &&
+      formAddress.address && formAddress.address !== ''
+    ) {
+        return false
+    }
+    return true
+})
+
+const submitAddress = () => {
+  console.log(formAddress)
+  onCloseModalAddress()
+}
+
+const onDestroyModalAddress =() => {
+    formAddress.telephone = ''
+    formAddress.province = null
+    formAddress.city = null
+    formAddress.address = ''
+}
 
 const submit = () => {
 

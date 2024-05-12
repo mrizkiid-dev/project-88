@@ -19,7 +19,7 @@
                 </div>
             </div>
             <div v-if="isShowDropDown && (choose !== undefined && choose.length > 0)"
-                class="border border-primary absolute z-[3] w-full max-h-[200px] mt-2 rounded-md overflow-y-scroll py-3 flex flex-col gap-1 drop-shadow-md" 
+                class="border border-primary absolute z-[3] w-full max-h-[200px] mt-2 rounded-md overflow-y-scroll scroll-radius py-3 flex flex-col gap-1 drop-shadow-md" 
                 :class="[{'bg-gray-darker': !isMandatory}, {'bg-third-color': isMandatory}]">
                 <div v-for="item in choose" :key="item.id">
                     <div class="hover:bg-third-color cursor-pointer px-3 select-none" @click="vForm(item)" >{{ item.name }}</div>

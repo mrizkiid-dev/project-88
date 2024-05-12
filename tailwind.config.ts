@@ -19,12 +19,14 @@ export default <Partial<Config>> {
       
     // },
     colors: {
+      ...colors,
       'primary': '#3A3A3A',
       'secondary': '#FDFD96',
       'third-color': '#FFFFFF',
       'gray-v1': '#F8F7F4',
       'gray-darker': '#E4E4E4',
-      'error-red': '#CC0202'
+      'error-red': '#CC0202',
+      'black-50-percent': '#808080'
     },
     fontFamily: {
       'Inconsolata': ['Inconsolata', 'sans-serif'],

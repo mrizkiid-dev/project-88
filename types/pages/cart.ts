@@ -1,5 +1,5 @@
 export type ICart = {
-    id: string,
+    id: number,
     imageSrc: string,
     title: string,
     price: number,
