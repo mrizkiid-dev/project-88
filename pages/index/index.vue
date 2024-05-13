@@ -103,8 +103,6 @@ console.log('cc = ',profileStore.uuid ?? 'teu aya');
 
 onMounted(async () => {
     profileStore.isLoading = true
-    console.log('aaa = ',((profileStore.uuid === null || profileStore.uuid === undefined || profileStore.uuid === '') &&
-        user.value !== null));
     
     if (
         (profileStore.uuid === null || profileStore.uuid === undefined || profileStore.uuid === '') &&
@@ -152,12 +150,9 @@ onMounted(async () => {
 
         }
         profileStore.isLoading = false
-        console.log(profileStore.uuid,'=====',profileStore.sessionId);
         
     }
 )
-
-console.log('profile store index = ',profileStore.uuid)
 
 // BEST-SELLER
 const headline = ref<string>(` Welcome to our store | We have a lot of merch design that perhaps suit with your preferences | These are our best seller | `)

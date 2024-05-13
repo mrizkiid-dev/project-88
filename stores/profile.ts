@@ -20,9 +20,9 @@ export const useProfileStore = defineStore('profile-store', {
             totalPayment: 0 as number 
         }
     },
-    // getters: {
-        
-    // },
+    getters: {
+        isAdressNotEmpty: (state) => (state.city.id !== '' && state.city.id !== null && state.city.id !== undefined)
+    },
     actions: {
         async initCart() {
             try {
@@ -69,7 +69,9 @@ export const useProfileStore = defineStore('profile-store', {
         async initProfile() {
             try {
                 if (useSupabaseUser().value?.id !== undefined) {
-                    const {data , error} = await useSupabaseClient<IDatabase>().from('user').select(`uuid,name,email,shopping_session(id,sub_total,total_payment),user_address(whatsapp_number,province,city,district,additional_address)`).eq('uuid',useSupabaseUser().value?.id).limit(1)
+                    const {data , error} = await useSupabaseClient<IDatabase>().from('user')
+                        .select(`uuid,name,email,shopping_session(id,sub_total,total_payment),user_address(whatsapp_number,province_id,province,city_id,city,district,additional_address)`)
+                        .eq('uuid',useSupabaseUser().value?.id).limit(1)
                     if (error) {
                         throw new Error(JSON.stringify(error));
                     }
@@ -79,15 +81,17 @@ export const useProfileStore = defineStore('profile-store', {
                         
                         this.uuid = data[0].uuid
                         this.sessionId = data[0].shopping_session[0].id
-                        this.name = data[0].shopping_session[0].id
+                        this.name = data[0].name
                         this.email = data[0].email
                         this.subTotal = data[0].shopping_session[0].sub_total
                         this.totalPayment = data[0].shopping_session[0].total_payment
 
                         if ('user_address' in data && isArray(data.user_address) && data.user_address.length > 0) {
                             this.phoneNumber = data[0].user_address[0].whatsapp_number
-                            this.province = data[0].user_address[0].province ?? ''
-                            this.city = data[0].user_address[0].city ?? ''
+                            this.province.id = data[0].user_address[0].province_id ?? ''
+                            this.province.name = data[0].user_address[0].province ?? ''
+                            this.city.id = data[0].user_address[0].city_id ?? ''
+                            this.city.name = data[0].user_address[0].city ?? ''
                             this.district = data[0].user_address[0].district ?? ''
                             this.additionalAddress = data[0].user_address[0].additional_address ?? ''
                         }
@@ -99,6 +103,29 @@ export const useProfileStore = defineStore('profile-store', {
                 console.log('error initProfile = ',error);
             }
         },
+        async initAddress() {
+            try {
+                if (useSupabaseUser().value?.id !== undefined) {
+                    const {data, error} = await useSupabaseClient<any>().from('user_address')
+                        .select('whatsapp_number,province,province_id,city,city_id,district,additional_address').eq('user_uuid',useSupabaseUser().value?.id).limit(1)
+                    if (data && data.length > 0) {
+                        this.phoneNumber = data[0].whatsapp_number
+                        this.province.id = data[0].province.id ?? ''
+                        this.province.name = data[0].province ?? ''
+                        this.city.id = data[0].city_id ?? ''
+                        this.city.name = data[0].city ?? ''
+                        this.district = data[0].district ?? ''
+                        this.additionalAddress = data[0].additional_address ?? ''
+                    }
 
+                    if (error) {
+                        throw error.message
+                    }
+                }
+            } catch (error) {
+                console.log('error ! initAddress profile store = ',error);
+                
+            }
+        }
     },
 })

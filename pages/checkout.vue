@@ -47,23 +47,23 @@
               <div class="flex flex-row gap-2 items-center ">
                 <p>Contact Name</p>
                 <p>:</p>
-                <p>{{ user.name }}</p>
+                <p>{{ profileStore.name }}</p>
               </div>
               <div class="flex flex-row gap-2 items-center w-full">
                 <p>Address : </p>
-                <p>{{ user.address }}</p>
+                <p>{{ profileStore.additionalAddress }}</p>
               </div>
               <div class="flex flex-row gap-2 items-center w-full">
                 <p>City : </p>
-                <p>{{ user.city }}</p>
+                <p>{{ profileStore.city.name }}</p>
               </div>
               <div class="flex flex-row gap-2 w-full">
                 <p>Province : </p>
-                <p>{{ user.province }}</p>
+                <p>{{ profileStore.province.name }}</p>
               </div>
               <div class="flex flex-row gap-2 items-center w-full">
                 <p>Phone Number : </p>
-                <p>{{ user.phoneNumber }}</p>
+                <p>{{ profileStore.phoneNumber }}</p>
               </div>
             </div>
           </div>
@@ -144,9 +144,15 @@ import type { responseCities, responseProvince } from '~/types/response/response
 import type { TAddress } from '~/types/components/address'
 
 const { isMobile } = useScreen()
-
 const checkoutStore = useUserCheckout()
 const profileStore = useProfileStore()
+const supabaseClient = useSupabaseClient<any>()
+
+onMounted(() => {
+  //shipping
+  // $fetch('')
+})
+
 
 const isShowModalAddress = ref<boolean>(false)
 const onAddAddress = () => {
@@ -163,21 +169,9 @@ const onCloseModalAddress = () => {
 
 
 const isAddressShow = computed(() => {
-  return profileStore.province.name !== null && profileStore.province.name !== undefined && profileStore.province.name !== ''
+  return profileStore.isAdressNotEmpty
 })
 
-const user = {
-  name: profileStore.name,
-  address: profileStore.additionalAddress,
-  city: profileStore.city,
-  province: profileStore.province,
-  phoneNumber: profileStore.phoneNumber
-}
-
-
-const subTotal = ref<string>('99999999')
-const discount = ref<string>('10000')
-const shippingPrice = ref<string>('900000')
 const totalPayments = ref<number>(99989000)
 
 const formAddress = reactive<TAddress>({
@@ -240,6 +234,7 @@ const isCityLoading = ref<boolean>(false)
 const cities = ref<ICity[]>([])
 watch(() => formAddress.province, async () => {
     formAddress.city = null
+    cities.value = []
     if (formAddress.province) {
         isCityLoading.value = true
         try {
@@ -320,8 +315,61 @@ const isButtonDisable = computed<boolean>(() => {
     return true
 })
 
-const submitAddress = () => {
-  console.log(formAddress)
+const submitAddress = async () => {
+  console.log('aaa = ' ,profileStore.uuid)
+  try {
+    const {data, error } = await supabaseClient.from('user_address').select('id').eq('user_uuid', profileStore.uuid).limit(1)
+    if (data && data.length > 0 && data[0].id) {
+      console.log('id = ',data[0].id);
+      
+      const { error } = await supabaseClient
+      .from('user_address')
+      .update(
+        { 
+          whatsapp_number: formAddress.telephone,
+          province_id: formAddress.province?.id,
+          province: formAddress.province?.name,
+          city_id: formAddress.city?.id,
+          city: formAddress.city?.name,
+          postal_code: formAddress.city?.postal_code,
+          additional_address: formAddress.address
+        }
+      ).eq('id',data[0].id)
+
+      if (error) {
+        throw JSON.stringify(error)
+      }
+    } else {
+      const { error } = await supabaseClient
+      .from('user_address')
+      .insert(
+        { 
+          whatsapp_number: formAddress.telephone,
+          province_id: formAddress.province?.id,
+          province: formAddress.province?.name,
+          city_id: formAddress.city?.id,
+          city: formAddress.city?.name,
+          postal_code: formAddress.city?.postal_code,
+          additional_address: formAddress.address
+        }
+      )
+
+      if (error) {
+        throw JSON.stringify(error)
+      }
+    }
+
+    if (error) {
+      throw JSON.stringify(error)
+    }
+  } catch (error) {
+    console.log('submit address - checkout = ',error)
+  }
+
+  await profileStore.initAddress()
+  console.log('city = ',profileStore.city);
+  
+ 
   onCloseModalAddress()
 }
 

@@ -1,5 +1,8 @@
 <template>
-    <main id="product-detail" class="flex justify-center items-center pt-10 pb-14 md:bg-gray-v1 md:pt-24">
+    <main class="h-svh" v-if="isLoading">
+        <Loading />
+    </main>
+    <main v-else id="product-detail" class="flex justify-center items-center pt-10 pb-14 md:bg-gray-v1 md:pt-24">
         <div class="
                 container bg-third-color rounded-3xl flex flex-col p-5 py-14 gap-10
                 md:border md:gap-4 
@@ -26,7 +29,7 @@
                         <span class="font-black text-third-color inline-block text-lg px-3 py-2 bg-primary md:text-xl">Rp. {{ price }}</span>
                     </div>
                 </div>
-                <ButtonBgYellow sytle-css="w-full mx-auto md:w-[500px] border-2 border-primary">
+                <ButtonBgYellow sytle-css="w-full mx-auto md:w-[500px] border-2 border-primary" @on-tap="submit">
                     <div class="flex flex-row justify-center items-center py-3 text-2xl gap-2">
                         <span class="font-bold tracking-wider text-lg md:text-xl">add to cart</span>
                         <Icon name="uil:cart" size="30px"/>
@@ -53,7 +56,8 @@ type TImage = {
     isChoose: boolean
 }
 
-const client = useSupabaseClient()
+const client = useSupabaseClient<any>()
+const user = useSupabaseUser()
 
 //detail product
 const title = ref<string>('')
@@ -97,6 +101,7 @@ if(error.value) {
 
 const images = ref<TImage[]>([])
 watch(status, () => {
+    images.value = []
     if (status.value === 'success' && data && data.value) {
         data.value[0].product_image.forEach(img => {
             images.value.push({
@@ -123,6 +128,46 @@ const setDisplayImage = (image: TImage) => {
         imageResult.isChoose = false
     }
     image.isChoose = !image.isChoose
+}
+
+const isLoading = ref<boolean>(false)
+const submit = async () => {
+    try {
+        isLoading.value = true
+        if(user.value && user.value.id) {
+            let errorCart: boolean = false
+            const {data , error} = await client.from('shopping_session').select('id').eq('user_uuid',user.value.id)
+            console.log('data = ',data && data.length > 0);
+            
+            if(data && data.length > 0) {
+                const { data: dataSelectProduct, error: errorSelectProduct } = await client.from('cart_item').select('id').eq('product_id', route.params.id).eq('session_id', data[0].id)
+                console.log(dataSelectProduct);
+                
+                if (!dataSelectProduct || (dataSelectProduct && dataSelectProduct.length < 1)) {
+                    const { error } = await client.from('cart_item').insert([{
+                        session_id: data[0].id,
+                        product_id: route.params.id,
+                        qty: 1
+                    }])
+                    console.log('kena');
+                    
+                    if (error) {
+                        throw JSON.stringify(error)
+                    }
+                }
+
+            } else {
+                navigateTo('/auth/login')
+            }
+            if (error) {
+                throw JSON.stringify(error)
+            }
+        }
+    } catch (error) {
+        console.log('ERROR! submit product detail = ',error);
+    } finally {
+        isLoading.value = false
+    }
 }
 
 </script>

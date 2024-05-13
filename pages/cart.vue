@@ -71,8 +71,9 @@
           <div v-for="cart in profileStore.cart" :key="cart.id" class="flex flex-row gap-2">
             <input type="checkbox" :value="cart.id" v-model="checked" @click="onTapChecBox(cart)"/>
             <div class="flex flex-row w-full p-2 border mt-2 font-semibold">
-              <div id="product-details" class="flex-grow-[4] max-w-[650px]">
+              <div id="product-details" class="flex flex-row flex-grow-[4] max-w-[650px] items-center gap-2">
                 <img src="/img/products/product-example-1.png" width="60px" height="60px" class="rounded-md"/>
+                <h3>{{ cart.title }}</h3>
               </div>
               <div id="quantity" class="flex-grow-[1] max-w-[120px] flex-row flex-center gap-2">
                 <strong @click="decrement(cart)" class="text-xl cursor-pointer select-none">-</strong>
