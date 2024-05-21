@@ -99,9 +99,12 @@
               <p>Discount</p>
               <strong>- Rp {{ discount }}</strong>
             </div> -->
-            <div class="flex justify-between">
+            <div v-if="checkoutStore.shipping.price && checkoutStore.shipping.price > 0" class="flex flex-row justify-between">
               <p>Shipping</p>
-              <strong>Rp {{ numberTocurrency(checkoutStore.shipping.price) }}</strong>
+              <div class="flex flex-col items-end">
+                <strong>Rp {{ numberTocurrency(checkoutStore.shipping.price) }}</strong>
+                <!-- <p class="text-sm">( {{ checkoutStore.shipping.estimate }} day )</p> -->
+              </div>
             </div>
           </div>
 
@@ -148,9 +151,8 @@ const checkoutStore = useUserCheckout()
 const profileStore = useProfileStore()
 const supabaseClient = useSupabaseClient<any>()
 
-onMounted(() => {
-  //shipping
-  // $fetch('')
+onMounted(async () => {
+  await initCheckout()
 })
 
 
@@ -315,6 +317,23 @@ const isButtonDisable = computed<boolean>(() => {
     return true
 })
 
+const initCheckout = async() => {
+  let totalWeight: number = 0
+  checkoutStore.products.forEach(product => {
+    totalWeight += product.weight
+  })
+  
+  if(totalWeight > 0) {
+    checkoutStore.totalWeight = totalWeight
+  }
+
+  if(profileStore.city.id !== null && profileStore.city.id !== undefined) {
+    await checkoutStore.initShipping(profileStore.city.id)
+  }
+
+  checkoutStore.totalPayment = checkoutStore.subTotal + (checkoutStore.shipping.price ?? 0)
+}
+
 const submitAddress = async () => {
   console.log('aaa = ' ,profileStore.uuid)
   try {
@@ -367,9 +386,8 @@ const submitAddress = async () => {
   }
 
   await profileStore.initAddress()
-  console.log('city = ',profileStore.city);
-  
- 
+  await initCheckout()
+
   onCloseModalAddress()
 }
 

@@ -28,18 +28,19 @@ export const useProfileStore = defineStore('profile-store', {
             try {
                 this.cart = []
                 if (this.sessionId !== '') {
-                    const {data , error} = await useSupabaseClient<IDatabase>().from('cart_item').select(`id,qty,product(id,name,price,product_image(image_url))`).eq('session_id',this.sessionId).returns<{id: any;
+                    const {data , error} = await useSupabaseClient<IDatabase>().from('cart_item').select(`id,qty,product(id,name,price,product_image(image_url),qty,weight)`).eq('session_id',this.sessionId).returns<{id: any;
                         qty: any;
                         product: {
                             id: any
                             name: any;
                             price: any;
+                            qty: any
+                            weight: any
                             product_image: {
                                 image_url: any;
                             }[];
                         };
                     }[]>()
-                    console.log('cart item = ',data);
                     
                     if(data !== null && error === null) {
                         let cart_temp: ICart
@@ -52,6 +53,8 @@ export const useProfileStore = defineStore('profile-store', {
                             cart_temp.title = cart.product.name
                             cart_temp.price = cart.product.price
                             cart_temp.quantity = cart.qty
+                            cart_temp.productQuantity = cart.product.qty
+                            cart_temp.productWeight = cart.product.weight
                             cart_temp.checked = false
                             cart_temp.imageSrc = cart.product.product_image[0].image_url
                             this.cart.push(cart_temp)
@@ -94,6 +97,7 @@ export const useProfileStore = defineStore('profile-store', {
                             this.city.name = data[0].user_address[0].city ?? ''
                             this.district = data[0].user_address[0].district ?? ''
                             this.additionalAddress = data[0].user_address[0].additional_address ?? ''
+
                         }
                     }
                 }
@@ -121,6 +125,7 @@ export const useProfileStore = defineStore('profile-store', {
                     if (error) {
                         throw error.message
                     }
+
                 }
             } catch (error) {
                 console.log('error ! initAddress profile store = ',error);

@@ -240,6 +240,7 @@ const submit = () => {
     checkoutItem.imageSrc = cart.imageSrc
     checkoutItem.qty = cart.quantity
     checkoutItem.price = cart.price
+    checkoutItem.weight = cart.quantity * cart.productWeight
     checkoutStore.products.push(checkoutItem)
   })
 

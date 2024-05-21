@@ -4,5 +4,7 @@ export type ICart = {
     title: string,
     price: number,
     quantity: number,
+    productQuantity: number,
+    productWeight: number,
     checked: boolean,
   }

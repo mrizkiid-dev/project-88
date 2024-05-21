@@ -30,6 +30,7 @@ export default defineNuxtConfig({
     'nuxt-vue3-google-signin',
     '@nuxt/image',
     '@vueuse/nuxt',
+    "@nuxt/scripts"
   ],
   supabase: {
     redirect: false,
