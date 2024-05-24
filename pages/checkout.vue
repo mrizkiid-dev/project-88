@@ -139,12 +139,19 @@ definePageMeta({
   middleware: 'checkout'
 })
 
+// const { $script } = useScript({
+//   src: 'https://app.sandbox.midtrans.com/snap/snap.js',
+//   async: true,
+//   "data-client-key": useRuntimeConfig().midtransClientKey,
+// })
+
 import { useUserCheckout } from '~/stores/checkout';
 import type { IChoose, ICity } from '~/types/components/dropdownForm'
 import type { ISignUpForm } from '~/types/pages/auth'
 import type { ITextfieldError } from '~/types/components/textfield';
 import type { responseCities, responseProvince } from '~/types/response/responseShipping';
 import type { TAddress } from '~/types/components/address'
+import type { TSnapCreateTransaction, TMidItemDetails, TMidCustomer } from '~/types/midtrans/midtrans-api';
 
 const { isMobile } = useScreen()
 const checkoutStore = useUserCheckout()
@@ -398,10 +405,95 @@ const onDestroyModalAddress =() => {
     formAddress.address = ''
 }
 
-const submit = () => {
+const submit = async() => {
+    try {
+      const { data, error } = await supabaseClient.from('order').insert([
+        {
+          shopping_session_id: profileStore.sessionId,
+          name_receiver: profileStore.name,
+          detail_address: profileStore.additionalAddress,
+          city_id: profileStore.city.id,
+          city: profileStore.city.name,
+          province_id: profileStore.province.id,
+          province: profileStore.province.name,
+        }
+      ]).select('id').limit(1)
 
+      if (error) {
+        throw JSON.stringify(error)
+      }
+      
+      if (data !== null && isNonEmptyArray(data)) {
+        const orderItemBody = checkoutStore.products.map((product) => {
+          return {
+            order_id: data[0].id,
+            product_id: product.id,
+            quantity: product.qty
+          }
+        })
+
+        const { error } = await supabaseClient.from('order_item').insert(orderItemBody)
+        if (error) {
+          throw JSON.stringify(error)
+        }
+
+        const itemDetails = checkoutStore.products.map<TMidItemDetails>((product) => {
+          return {
+              id: product.id.toString(),
+              name: product.title,
+              price: product.price,
+              quantity: product.qty,
+            }
+        })
+
+        itemDetails.push({
+          id: 'POS-IND',
+          name: 'POST INDONESIA Shipping',
+          price: checkoutStore.shipping.price,
+          quantity: 1
+        })
+
+        const {firstName, lastName } = spliceName(profileStore.name)
+        const customer_detail = <TMidCustomer>{
+          first_name: firstName,
+          last_name: lastName,
+          email: profileStore.email,
+          phone: profileStore.phoneNumber,
+          shipping_address: {
+            first_name: firstName,
+            last_name: lastName,
+            address: profileStore.additionalAddress,
+            city: profileStore.city.name,
+            email: profileStore.email,
+            phone: profileStore.phoneNumber,
+            country_code: "IDN"
+          }
+        }
+
+        const response = await $fetch('/api/shipping/midtrans-token',{
+          method: 'POST',
+          body: <TSnapCreateTransaction>{
+            id: 'TEST'+ Math.floor(Math.random()*100) + data[0].id,
+            product: itemDetails,
+            customer_detail: customer_detail,
+            gross_amount: checkoutStore.totalPayment
+          }
+        })
+
+        if (response && typeof response === 'object' && 'token' in response && typeof response.token === 'string'){
+          const { error } = await supabaseClient.from('order').update({
+            midtrans_token: response.token
+          }).eq('id', data[0].id)
+
+          if ( error ) {
+            throw JSON.stringify(error)
+          }
+          // window.snap.pay(response.token)
+        }
+      }
+    } catch (error) {
+      console.log('ERROR! sumbit pay = ',error);
+    }
 }
 
 </script>
-
-<style scoped></style>

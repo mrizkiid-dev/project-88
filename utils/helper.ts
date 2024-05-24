@@ -18,6 +18,6 @@ export type Prettify<T> = {
 } & {};
 
 
-export const isObject = <T>(value: unknown): value is T => {
+export const isObjectNotNull = <T>(value: unknown): value is T => {
   return value !== null && value !== undefined && typeof value === 'object';
 };

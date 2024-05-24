@@ -80,8 +80,6 @@ export const useProfileStore = defineStore('profile-store', {
                     }
 
                     if (data !== null && data.length > 0 && error === null) {
-                        console.log('it is happen');
-                        
                         this.uuid = data[0].uuid
                         this.sessionId = data[0].shopping_session[0].id
                         this.name = data[0].name
@@ -92,6 +90,7 @@ export const useProfileStore = defineStore('profile-store', {
                         if ('user_address' in data && isArray(data.user_address) && data.user_address.length > 0) {
                             this.phoneNumber = data[0].user_address[0].whatsapp_number
                             this.province.id = data[0].user_address[0].province_id ?? ''
+                            
                             this.province.name = data[0].user_address[0].province ?? ''
                             this.city.id = data[0].user_address[0].city_id ?? ''
                             this.city.name = data[0].user_address[0].city ?? ''
@@ -114,7 +113,7 @@ export const useProfileStore = defineStore('profile-store', {
                         .select('whatsapp_number,province,province_id,city,city_id,district,additional_address').eq('user_uuid',useSupabaseUser().value?.id).limit(1)
                     if (data && data.length > 0) {
                         this.phoneNumber = data[0].whatsapp_number
-                        this.province.id = data[0].province.id ?? ''
+                        this.province.id = data[0].province_id ?? ''
                         this.province.name = data[0].province ?? ''
                         this.city.id = data[0].city_id ?? ''
                         this.city.name = data[0].city ?? ''

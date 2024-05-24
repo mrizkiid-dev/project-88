@@ -4,7 +4,9 @@ import { prefix } from "#tailwind-config"
 export default defineNuxtConfig({
   devtools: { enabled: true },
   runtimeConfig: {
-    rajaOngkirApi: process.env.RAJA_ONGKIR_API
+    rajaOngkirApi: process.env.RAJA_ONGKIR_API,
+    midtransClientKey: process.env.MIDTRANS_CLIENT_KEY,
+    midtransServerKey: process.env.MIDTRANS_SERVER_KEY
   },
   components: [
     {
