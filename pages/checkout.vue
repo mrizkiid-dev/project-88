@@ -6,7 +6,7 @@
     </h1>
 
     <teleport v-if="isShowModalAddress" to="#pop-up">
-      <div class="fixed z-[99] w-screen h-screen bg-[#abaaaa80] cursor-pointer flex items-center justify-center" @click.self="onCloseModalAddress">
+      <div class="fixed z-[98] w-screen h-screen bg-[#abaaaa80] cursor-pointer flex items-center justify-center" @click.self="onCloseModalAddress">
         <form class="bg-third-color rounded-xl min-w-[300px] h-[700px] flex flex-col p-5 overflow-y-scroll scroll-radius gap-3 md:min-w-[600px]" @submit.prevent="submitAddress">
           <h1 class="flex justify-center font-black tracking-wider text-2xl mb-10">Address</h1>
           <TextField title="phone number" place-holder="089xxxxxxxxx" input-type="tel" :is-mandatory="true" v-model="formAddress.telephone"/>
@@ -18,6 +18,14 @@
           <ButtonDarkMd :disable="isButtonDisable" title="SignUp" style-css="min-h-[40px] w-full"/>
         </form>
       </div>
+    </teleport>
+
+    <teleport v-if="profileStore.isLoading" to="#pop-up">
+      <Loading />
+    </teleport>
+
+    <teleport v-if="hasError" to="#pop-up">
+      <ErrorPopUp @close-pop-up="onClosePopError"/>
     </teleport>
 
     <div class="container max-w-[1337px] flex flex-row gap-4">
@@ -159,9 +167,16 @@ const profileStore = useProfileStore()
 const supabaseClient = useSupabaseClient<any>()
 
 onMounted(async () => {
+  profileStore.isLoading = true
   await initCheckout()
+  profileStore.isLoading = false
 })
 
+const hasError = ref<boolean>(true)
+const onClosePopError = () => {
+  // hasError.value = false
+  console.log('is clicked');
+}
 
 const isShowModalAddress = ref<boolean>(false)
 const onAddAddress = () => {
@@ -406,7 +421,9 @@ const onDestroyModalAddress =() => {
 }
 
 const submit = async() => {
+  
     try {
+      profileStore.isLoading = true
       const { data, error } = await supabaseClient.from('order').insert([
         {
           shopping_session_id: profileStore.sessionId,
@@ -425,6 +442,7 @@ const submit = async() => {
       
       if (data !== null && isNonEmptyArray(data)) {
         const orderItemBody = checkoutStore.products.map((product) => {
+          profileStore.deleteCart(product.id)
           return {
             order_id: data[0].id,
             product_id: product.id,
@@ -446,12 +464,14 @@ const submit = async() => {
             }
         })
 
-        itemDetails.push({
-          id: 'POS-IND',
-          name: 'POST INDONESIA Shipping',
-          price: checkoutStore.shipping.price,
-          quantity: 1
-        })
+        if (checkoutStore.shipping.price && typeof checkoutStore.shipping.price === 'number' && checkoutStore.shipping.price >= 0) {
+          itemDetails.push({
+            id: 'POS-IND',
+            name: 'POST INDONESIA Shipping',
+            price: checkoutStore.shipping.price,
+            quantity: 1
+          })
+        }
 
         const {firstName, lastName } = spliceName(profileStore.name)
         const customer_detail = <TMidCustomer>{
@@ -493,6 +513,8 @@ const submit = async() => {
       }
     } catch (error) {
       console.log('ERROR! sumbit pay = ',error);
+    } finally {
+      profileStore.isLoading = false
     }
 }
 

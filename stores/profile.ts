@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import type { city, province } from '~/types/database/profile'
 import type { IDatabase } from '~/types/database/supabase'
 import type { ICart } from '~/types/pages/cart'
+
 export const useProfileStore = defineStore('profile-store', {
     state: () => {
         return {
@@ -130,6 +131,19 @@ export const useProfileStore = defineStore('profile-store', {
                 console.log('error ! initAddress profile store = ',error);
                 
             }
+        },
+        async deleteCart(id: string | number) {
+            const index = this.cart.findIndex(item => (
+                item.id === id
+            ))
+            if (index && index >= 0) {
+                this.cart.splice(index, 1)
+            }
+
+            const { error } = await useSupabaseClient()
+                .from('cart_item')
+                .delete()
+                .eq('id', id)
         }
     },
 })
