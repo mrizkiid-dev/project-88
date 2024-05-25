@@ -21,3 +21,11 @@ export type Prettify<T> = {
 export const isObjectNotNull = <T>(value: unknown): value is T => {
   return value !== null && value !== undefined && typeof value === 'object';
 };
+
+export const isANumber = (input: number | string | null | undefined) => {
+  if (input === null || input === undefined || input === '') {
+    return false;
+  }
+  
+  return !isNaN(Number(input));
+}

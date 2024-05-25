@@ -24,7 +24,7 @@
       <Loading />
     </teleport>
 
-    <teleport v-if="hasError" to="#pop-up">
+    <teleport v-if="hasError.value" to="#pop-up">
       <ErrorPopUp @close-pop-up="onClosePopError"/>
     </teleport>
 
@@ -172,9 +172,27 @@ onMounted(async () => {
   profileStore.isLoading = false
 })
 
-const hasError = ref<boolean>(true)
+// const hasError = ref<boolean>(false)
+const hasError = reactive<{
+  value: boolean,
+  payment: boolean,
+  message: string,
+}>({
+  value: false,
+  payment: false,
+  message: '',
+})
 const onClosePopError = () => {
-  // hasError.value = false
+  // TODO
+  // checkoutStore.products.forEach(product => {
+  //   profileStore.deleteCart(product.id)
+  // })
+  // END TODO
+  if(hasError.payment) {
+    navigateTo('/order')
+  } else {
+    navigateTo('/cart')
+  }
   console.log('is clicked');
 }
 
@@ -447,7 +465,7 @@ const submit = async() => {
             order_id: data[0].id,
             product_id: product.id,
             quantity: product.qty
-          }
+          } 
         })
 
         const { error } = await supabaseClient.from('order_item').insert(orderItemBody)
@@ -490,10 +508,12 @@ const submit = async() => {
           }
         }
 
+        const midtransId = 'TEST'+ Math.floor(Math.random()*100) + data[0].id
+
         const response = await $fetch('/api/shipping/midtrans-token',{
           method: 'POST',
           body: <TSnapCreateTransaction>{
-            id: 'TEST'+ Math.floor(Math.random()*100) + data[0].id,
+            id: midtransId,
             product: itemDetails,
             customer_detail: customer_detail,
             gross_amount: checkoutStore.totalPayment
@@ -502,17 +522,21 @@ const submit = async() => {
 
         if (response && typeof response === 'object' && 'token' in response && typeof response.token === 'string'){
           const { error } = await supabaseClient.from('order').update({
-            midtrans_token: response.token
+            midtrans_id: midtransId,
+            midtrans_token: response.token,
           }).eq('id', data[0].id)
 
-          if ( error ) {
+          if ( !error ) {
+            navigateTo(`/payment/${data[0].id}`)
+          } else {
+            hasError.payment = true
             throw JSON.stringify(error)
           }
-          // window.snap.pay(response.token)
         }
       }
     } catch (error) {
       console.log('ERROR! sumbit pay = ',error);
+      hasError.value = true
     } finally {
       profileStore.isLoading = false
     }
