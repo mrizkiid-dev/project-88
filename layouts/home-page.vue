@@ -1,39 +1,35 @@
 <template>
-        <!-- <ClientOnly> -->
-                <AppbarSearchMobile v-if="isMobile" :is-gray="isGray" :search-result="searchResult" bg="bg-secondary" v-model="searchAppBar" :in-style="inStyle"/>
-                <AppbarSearch v-else v-model="searchAppBar" :search-result="searchResult"/>
-        <!-- </ClientOnly> -->
-        <!-- <div :class="isMobile ? 'pt-[60px]' : 'pt-[70px]'"/> -->
+        <AppbarSearchMobile v-if="isMobile" :is-gray="isGray" bg="bg-secondary" :in-style="inStyle"/>
+        <AppbarSearch v-else v-model="searchAppBar" :search-result="searchResult" :is-search-loading="isSearchLoading"/>
         <slot >
         </slot>
-        <b>{{ searchAppBar }}</b>
-        <!-- <ClientOnly>  -->
-                <Bottomnav v-if="isMobile"/>
-                <Footer v-else />
-        <!-- </ClientOnly> -->
+
+        <Bottomnav v-if="isMobile"/>
+        <Footer v-else />
 </template>
 
 <script setup lang="ts">
-import type {IProduct} from '~/types/components/searchResult'
+import type { TSearchResult } from '~/types/components/searchResult'
+import { onDebounce } from '~/utils/helper';
 
-const { isMobile, width } = useScreen()
+// LifeCycle
+onBeforeMount (() => {
+        window.addEventListener('scroll', handleScrolll)
+},)
+
+onBeforeUnmount (() => {
+        window.removeEventListener('scroll', handleScrolll)
+},)
+
+//top variable
 const store = useAppStore()
+const supabaseClient = useSupabaseClient()
+
+// set screen
+const { isMobile } = useScreen()
 store.isMobile = isMobile.value
 
-const searchAppBar = defineModel<string>()
-watch(searchAppBar, () => {
-        console.log('aaa = ',searchAppBar.value);
-})
-
-const searchResult = ref<IProduct[]>([
-    {image: '/img/product-example-1.png',title: 'title product example 1',price: 'Rp. 87.200'},
-    {image: '/img/product-example-1.png',title: 'title product example 2',price: 'Rp. 87.200'},
-    {image: '/img/product-example-1.png',title: 'title product example 3',price: 'Rp. 87.200'},
-    {image: '/img/product-example-1.png',title: 'title product example 4',price: 'Rp. 87.200'},
-    {image: '/img/product-example-1.png',title: 'title product example 5',price: 'Rp. 87.200'},
-    {image: '/img/product-example-1.png',title: 'title product example 6',price: 'Rp. 87.200'},
-])
-
+// app bar color
 const isGray = ref<boolean>()
 const inStyle = ref<string>()
 const scrollY = ref<number>(0)
@@ -42,10 +38,6 @@ const handleScrolll = () => {
         console.log(window.scrollY);
         scrollY.value = window.scrollY
 }
-
-onBeforeMount (() => {
-        window.addEventListener('scroll', handleScrolll)
-},)
 
 watch(scrollY, () => {
         if (scrollY.value < 200) {
@@ -57,8 +49,6 @@ watch(scrollY, () => {
         }
 })
 
-onBeforeUnmount (() => {
-        window.removeEventListener('scroll', handleScrolll)
-},)
+const {isSearchLoading, searchAppBar, searchResult} = useSearchProductAppBar()
 
 </script>

@@ -43,6 +43,16 @@ definePageMeta({
     layout: 'order'
 })
 
+const supabaseClient = useSupabaseClient()
+
+const {data, error} = await supabaseClient.from('order').select('id,created_at,total_payment,order_item(product_id,product_name,quantity,price)')
+if (error) {
+    console.log('error order = ',error);
+}
+
+console.log('data = ',data);
+
+
 const orders = [
     {
         orderId: '123456789123456789',

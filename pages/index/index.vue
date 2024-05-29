@@ -1,5 +1,5 @@
 <template>
-    <Teleport v-if="profileStore.isLoading" to="#pop-up">
+    <Teleport v-if="profileStore.isLoading || isLoading" to="#pop-up">
         <Loading />
     </Teleport>
     <header class="bg-secondary w-full h-[400px] md:h-[90vh] flex flex-row pt-[60px] background-grid-homepage">
@@ -98,8 +98,7 @@ const user = useSupabaseUser()
 const profileStore = useProfileStore()
 
 const route = useRoute()
-console.log('xx = ',user.value?.id ?? 'teu aya');
-console.log('cc = ',profileStore.uuid ?? 'teu aya');
+const isLoading = computed(() => loadingBestSeller.value || loadingCatalogue.value)
 
 onMounted(async () => {
     profileStore.isLoading = true
@@ -221,6 +220,7 @@ const { data: catalogue, pending: loadingCatalogue, error: errorCatalogue, refre
     }
     return data
 },)
+
 const seeMore = () => {
     navigateTo({
         path: 'search-result',

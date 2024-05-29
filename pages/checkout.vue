@@ -147,16 +147,9 @@ definePageMeta({
   middleware: 'checkout'
 })
 
-// const { $script } = useScript({
-//   src: 'https://app.sandbox.midtrans.com/snap/snap.js',
-//   async: true,
-//   "data-client-key": useRuntimeConfig().midtransClientKey,
-// })
 
 import { useUserCheckout } from '~/stores/checkout';
 import type { IChoose, ICity } from '~/types/components/dropdownForm'
-import type { ISignUpForm } from '~/types/pages/auth'
-import type { ITextfieldError } from '~/types/components/textfield';
 import type { responseCities, responseProvince } from '~/types/response/responseShipping';
 import type { TAddress } from '~/types/components/address'
 import type { TSnapCreateTransaction, TMidItemDetails, TMidCustomer } from '~/types/midtrans/midtrans-api';
@@ -183,11 +176,6 @@ const hasError = reactive<{
   message: '',
 })
 const onClosePopError = () => {
-  // TODO
-  // checkoutStore.products.forEach(product => {
-  //   profileStore.deleteCart(product.id)
-  // })
-  // END TODO
   if(hasError.payment) {
     navigateTo('/order')
   } else {
@@ -439,7 +427,6 @@ const onDestroyModalAddress =() => {
 }
 
 const submit = async() => {
-  
     try {
       profileStore.isLoading = true
       const { data, error } = await supabaseClient.from('order').insert([
@@ -464,7 +451,9 @@ const submit = async() => {
           return {
             order_id: data[0].id,
             product_id: product.id,
-            quantity: product.qty
+            product_name: product.title,
+            price: product.price,
+            quantity: product.qty,
           } 
         })
 

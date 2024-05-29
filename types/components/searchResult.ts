@@ -1,5 +1,6 @@
-export interface IProduct {
+export type TSearchResult = {
+    id: string | number,
     image: string,
     title: string,
-    price: string,
+    price: number,
 }

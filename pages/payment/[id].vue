@@ -35,31 +35,6 @@ definePageMeta({
     layout: false
 })
 
-
-// const response = await $fetch('/api/shipping/midtrans-token',{
-//           method: 'POST',
-//           body: <TSnapCreateTransaction>{
-//             id: midtransId,
-//             product: itemDetails,
-//             customer_detail: customer_detail,
-//             gross_amount: checkoutStore.totalPayment
-//           }
-//         })
-
-//         if (response && typeof response === 'object' && 'token' in response && typeof response.token === 'string'){
-//           const { error } = await supabaseClient.from('order').update({
-//             midtrans_id: midtransId,
-//             midtrans_token: response.token,
-//           }).eq('id', data[0].id)
-
-//           if ( !error ) {
-//             navigateTo(`/payment/${data[0].id}`)
-//           } else {
-//             hasError.payment = true
-//             throw JSON.stringify(error)
-//           }
-//         }
-
 onMounted( async() => {
     try {
         if(!(route.params.id && typeof route.params.id === 'string' && isANumber(route.params.id))) {

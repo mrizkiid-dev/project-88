@@ -1,0 +1,1 @@
+export type TSearchResult = any

@@ -54,5 +54,6 @@ export default defineNuxtConfig({
     '/cart' : {ssr : false},
     '/order' : {ssr : false},
     '/checkout' : {ssr : false},
+    '/payment' : {ssr : false}
   }
 })

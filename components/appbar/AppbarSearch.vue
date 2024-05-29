@@ -28,7 +28,7 @@
                         v-model="searchAppBar"
                     >
                     <div class="flex items-center gap-2">
-                        <Icon v-if="isSearching" name="eos-icons:loading" size="25"/>
+                        <Icon v-if="isSearchLoading" name="eos-icons:loading" size="25"/>
                         <div class="flex items-center justify-center p-2 px-3 bg-primary rounded-r-[15px]">
                             <icon name="ion:search" size="25" color="#ffffffff"/>
                         </div>
@@ -36,8 +36,8 @@
                 </div>
 
                 <!-- searchResult -->
-                <div v-if="false" id="search-result" class="absolute border-2 border-primary bg-third-color rounded-lg p-4 w-full flex flex-col gap-4 px-6 mt-1 max-h-[300px] overflow-y-scroll no-scrollbar">
-                    <SearchSuggestion v-for="card in searchResult" :title="card.title" :image-src="card.image" />
+                <div v-if="searchResult && searchResult.length > 0" id="search-result" class="absolute border-2 border-primary bg-third-color rounded-lg p-4 w-full flex flex-col gap-4 px-6 mt-1 max-h-[300px] overflow-y-scroll scroll-radius">
+                    <SearchSuggestion v-for="card in searchResult" :key="card.id" :id="card.id" :title="card.title" :image-src="card.image" />
                 </div>
             </div>
 
@@ -92,10 +92,10 @@ const user = useSupabaseUser()
 const profileStore = useProfileStore()
 
 const { searchResult } = defineProps<{
-    searchResult?: any
+    searchResult?: any,
+    isSearchLoading? : boolean
 }>()
 
-const isSearching = ref<boolean>(true)
 const isProfileShow = ref<boolean>(false)
 
 const signOut = async () => {
