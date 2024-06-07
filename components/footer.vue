@@ -22,8 +22,8 @@
                 </div>
 
                 <div id="wa" class="flex-1 flex flex-col gap-1">
-                    <textarea rows="5" class="focus:outline-none border rounded-sm resize-none py-1 px-2" placeholder="hi ka ingin bertanya ..."/>
-                    <button class="bg-[#3A3A3A] w-full p-2 rounded-sm text-third-color">
+                    <textarea rows="5" class="focus:outline-none border rounded-sm resize-none py-1 px-2" placeholder="hi ka ingin bertanya ..." v-model="inputWaMessage" />
+                    <button class="bg-[#3A3A3A] w-full p-2 rounded-sm text-third-color" @click="submitWa">
                         chat us via whatsapp
                     </button>
                 </div>
@@ -32,11 +32,11 @@
             <div id="right" class="container flex flex-col border-b-2 border-primary justify-center items-start w-[50%] px-20 py-20 lg:px-32">
                 <h2 class="mb-4 font-black text-xl"> Newsletter </h2>
                 <p class="text-left mb-2">
-                    Daftarkan email anda untuk mendapatkan informasi<br>
-                    Promo & Desain terbaru dari project88
+                    Subscribe to our newsletter to receive<br>
+                    the latest promotions and design updates from Project88
                 </p>
-                <input type="text" class="focus:outline-none border rounded-sm mb-2 w-full pl-3 py-2" placeholder="example@email.com">
-                <ButtonBgYellow title="Subscribe" sytle-css="px-4 py-1 rounded-sm"/>
+                <input type="text" class="focus:outline-none border rounded-sm mb-2 w-full pl-3 py-2" placeholder="example@email.com" v-model="inputSubscriber" />
+                <ButtonBgYellow title="Subscribe" sytle-css="px-4 py-1 rounded-sm" @on-tap="submitSubs"/>
             </div>
         </div>
 
@@ -54,5 +54,28 @@
 </template>
 
 <script setup lang="ts">
+const profileStore = useProfileStore()
+
+const inputSubscriber = ref<string>('')
+if (profileStore.email !== '') {
+    inputSubscriber.value = profileStore.email
+}
+const submitSubs = () => {
+    console.log(inputSubscriber.value);
+    
+}
+
+const inputWaMessage = ref<string>('')
+watch(inputWaMessage , (a) => {
+    console.log('a = ',a);
+    
+})
+const submitWa = () => {
+    const encodeParam = encodeURIComponent(inputWaMessage.value)
+    const urlsWa = `https://wa.me/+6282119777514?text=${encodeParam}`
+    
+    window.open(urlsWa)
+
+}
 
 </script>

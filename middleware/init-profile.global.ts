@@ -4,7 +4,7 @@ export default defineNuxtRouteMiddleware( async (to, from) => {
 
     if (import.meta.server) return
 
-    if(profileStore.uuid === '' && user.value?.id === null) {
+    if(profileStore.uuid === '' || user.value?.id === null) {
         await profileStore.initProfile()
     }
 

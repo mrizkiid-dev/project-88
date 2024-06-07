@@ -5,9 +5,11 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
+    "dev:staging": "nuxi dev --dotenv .env.staging",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "kill-port": "sudo kill -9 $(sudo lsof -t -i:3000)"
   },
   "dependencies": {
     "@nuxt/image": "^1.4.0",

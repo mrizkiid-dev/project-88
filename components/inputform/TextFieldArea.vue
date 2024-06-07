@@ -4,7 +4,7 @@
             <label v-if="title" class="text-base md:text-xl">{{ title }}</label>
             <span v-if=isMandatory class="text-[#CC0202]">*</span>
         </div>
-        <div class="w-full border rounded-[5px] min-h-[60px] px-3 flex items-center justify-between" :class="{'bg-gray-darker': !isMandatory}">
+        <div class="w-full border rounded-[5px] min-h-[60px] px-1 flex items-center justify-between" :class="{'bg-gray-darker': !isMandatory}">
             <textarea
                 :id="title" :name="title" rows="6" :placeholder="placeHolder"
                 class="w-full resize-none p-2 focus:outline-none"

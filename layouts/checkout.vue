@@ -1,12 +1,16 @@
 <template>
-    <AppbarTitle ref="appbarTitleRef" v-if="isMobile" title="Cart"/>
-    <AppbarSearch ref="appbarSearchRef" v-else/>
-    <slot>
-
-    </slot>
+    <ClientOnly v-if="isMobile">
+        <AppbarTitle ref="appbarTitleRef" title="checkout"/>
+    </ClientOnly>
+    <ClientOnly v-else>   
+        <AppbarSearch ref="appbarSearchRef" />
+    </ClientOnly>
+    <slot />
     <!-- <BottomNavTransaction v-if="isMobile" title="Total Payments" :total-payment="userTransactionStore.totalPayment" title-button="checkout" />
     <Footer v-else /> -->
-    <Footer v-if="!isMobile"/>
+    <ClientOnly v-if="!isMobile">
+        <Footer />
+    </ClientOnly>
 
 </template>
 

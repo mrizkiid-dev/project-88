@@ -29,12 +29,17 @@
 </template>
 
 <script setup lang="ts">
-const { title } = defineProps<{
+const { title, isLogo, overrideNavigate } = defineProps<{
     title: string,
-    isLogo?: boolean
+    isLogo?: boolean,
+    overrideNavigate?: string
 }>()
 const router = useRouter()
-const backButton = () => {
-    router.go(-1)
+const backButton = async () => {
+    if(overrideNavigate) {
+        navigateTo(overrideNavigate)
+    } else {
+        router.back()
+    }
 }
 </script>

@@ -138,7 +138,7 @@
   </main>
 
   <!-- Mobile only -->
-  <BottomNavTransaction v-if="isMobile" title="Total Payments" :total-payment="totalPayments" title-button="checkout" @on-tap="submit"/>
+  <BottomNavTransaction v-if="isMobile" title="Total Payments" :total-payment="checkoutStore.totalPayment" title-button="pay" @on-tap="submit"/>
 </template>
 
 <script setup lang="ts">
@@ -438,6 +438,9 @@ const submit = async() => {
           city: profileStore.city.name,
           province_id: profileStore.province.id,
           province: profileStore.province.name,
+          sub_total: checkoutStore.subTotal,
+          total_payment: checkoutStore.totalPayment,
+          shipping_price: checkoutStore.shipping.price,
         }
       ]).select('id').limit(1)
 
@@ -452,6 +455,7 @@ const submit = async() => {
             order_id: data[0].id,
             product_id: product.id,
             product_name: product.title,
+            image_url: product.imageSrc,
             price: product.price,
             quantity: product.qty,
           } 

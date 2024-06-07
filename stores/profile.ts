@@ -22,7 +22,8 @@ export const useProfileStore = defineStore('profile-store', {
         }
     },
     getters: {
-        isAdressNotEmpty: (state) => (state.city.id !== '' && state.city.id !== null && state.city.id !== undefined)
+        isAdressNotEmpty: (state) => (state.city.id !== '' && state.city.id !== null && state.city.id !== undefined),
+        isUserEmpty: (state) => ( state.uuid === '' )
     },
     actions: {
         async initCart() {
@@ -144,6 +145,6 @@ export const useProfileStore = defineStore('profile-store', {
                 .from('cart_item')
                 .delete()
                 .eq('id', id)
-        }
+        },
     },
 })

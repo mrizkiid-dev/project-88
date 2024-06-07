@@ -243,6 +243,7 @@ watch(() => isPopUpShow.value , () => {
 
 const isCartButtonDisable = ref<boolean>(false)
 const onTapCart = async (id: string | number) => {
+    isPopUpShow.value = false
     isCartButtonDisable.value = true
     if(user.value && user.value.id) {
         let errorCart: boolean = false

@@ -26,6 +26,8 @@
                         "
                         placeholder="Case Iphone Javascript"
                         v-model="searchAppBar"
+                        @keyup.enter="onPressEnter"
+                        autocomplete="off"
                     >
                     <div class="flex items-center gap-2">
                         <Icon v-if="isSearchLoading" name="eos-icons:loading" size="25"/>
@@ -51,11 +53,11 @@
                     <Icon name="iconamoon:profile-fill" class="text-[40px]"/>
                     <div v-if="isProfileShow" class="absolute min-w-[200px] rounded-[10px] -translate-x-[5rem] bg-third-color border flex flex-col gap-2 justify-start px-1 py-5">
                         <div v-if="user">
-                            <div class="flex justify-center tracking-wider">
+                            <div class="flex justify-center tracking-wider overflow-ellipsis">
                                 <strong>Hello, </strong>
                                 <strong>{{ userDetail.name }}</strong>
                             </div>
-                            <div class="bg-white px-2 py-1 shadow-sm cursor-pointer" @click="">
+                            <div class="bg-white px-2 py-1 shadow-sm cursor-pointer" @click="navigateToProfile">
                                 Profile
                             </div>
                             <div class="bg-white px-2 py-1 shadow-sm cursor-pointer" @click="navigateToOrder">
@@ -90,46 +92,56 @@
 const supabaseClient = useSupabaseClient()
 const user = useSupabaseUser()
 const profileStore = useProfileStore()
-
-const { searchResult } = defineProps<{
-    searchResult?: any,
-    isSearchLoading? : boolean
-}>()
+const {isSearchLoading, searchAppBar, searchResult} = useSearchProductAppBar()
 
 const isProfileShow = ref<boolean>(false)
-
-const signOut = async () => {
-    profileStore.$reset()
-    const { error } = await supabaseClient.auth.signOut()
-}
-const signIn = async () => {
-    await navigateTo('/auth/login')
-}
-
-const searchAppBar = defineModel<string>()
-
 const userDetail = reactive<{
     name: string,
     address: {
         province: string,
         city: string,
         district: string,
-    },
-    order: []
+    }
 }>(
     {
-        name: 'Muhammad Rizki',
+        name: profileStore.name || 'world',
         address: {
             province: 'Jawa Barat',
             city: 'Kota Bandung',
             district: 'Arcamanik'
-        },
-        order: []
+        }
     }
 )
 
-const navigateToOrder = () => {
-    navigateTo('/order')
+const signOut = async () => {
+    const { error } = await supabaseClient.auth.signOut()
+    if (error) {
+        console.log('error signout = ',error);
+    } else {
+        profileStore.$reset()
+    }
+}
+const signIn = async () => {
+    await navigateTo('/auth/login')
+}
+
+const navigateToOrder = async () => {
+    await navigateTo('/order')
+}
+
+const navigateToProfile = async () => {
+    console.log('profile click kena');
+    
+    await navigateTo('/profile')
+}
+
+const onPressEnter = async () => {
+    await navigateTo({
+        path: '/search-result',
+        query: {
+            search: searchAppBar.value
+        }
+    })
 }
 
 </script>

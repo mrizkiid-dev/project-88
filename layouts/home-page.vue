@@ -1,11 +1,10 @@
 <template>
-        <AppbarSearchMobile v-if="isMobile" :is-gray="isGray" bg="bg-secondary" :in-style="inStyle"/>
-        <AppbarSearch v-else v-model="searchAppBar" :search-result="searchResult" :is-search-loading="isSearchLoading"/>
-        <slot >
-        </slot>
+        <AppbarSearchMobile v-show="isMobile" :is-gray="isGray" bg="bg-secondary" :in-style="inStyle"/>
+        <AppbarSearch v-show="!isMobile" />
+        <slot />
 
-        <Bottomnav v-if="isMobile"/>
-        <Footer v-else />
+        <Bottomnav v-show="isMobile"/>
+        <Footer v-show="!isMobile" />
 </template>
 
 <script setup lang="ts">
@@ -48,7 +47,5 @@ watch(scrollY, () => {
                 inStyle.value = `bg-third-color border-b-[1px] border-primary`
         }
 })
-
-const {isSearchLoading, searchAppBar, searchResult} = useSearchProductAppBar()
 
 </script>

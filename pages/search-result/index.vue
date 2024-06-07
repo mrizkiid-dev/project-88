@@ -1,21 +1,22 @@
 <template>
-    <div class="flex flex-col items-center justify-center py-[50px]" :class="[{'pt-[70px]': !isMobile}]">
-        <div v-if="isQuery" class="flex flex-col w-full container px-5 pt-10 md:py-0">
-            <h3 class="font-bold">Result of '{{ keyword }}'</h3>
-            <h5>{{ product?.length}} items found</h5>
-        </div>
-
-        <div id="items-found" class="py-10">
-            <ol class="
-                grid grid-cols-2 gap-4 justify-items-center max-w-[1319px]
-                md:grid-cols-3
-                lg:grid-cols-4    
-            ">
-                <li v-for="item in product" :key="item.id">
-                    <Catalogue :id="stringToNumber(item.id)" :title="item.name" :image-src="item.product_image[2].image_url" :price="stringToNumber(item.price)"/>
-                </li>
-            </ol>
-        </div>
+    <main class="min-h-svh flex flex-col items-center justify-between py-[50px]" :class="[{'pt-[70px]': !isMobile}]">
+        <section>
+            <div v-if="isQuery" class="flex flex-col w-full container px-5 pt-10 md:py-0">
+                <h3 class="font-bold">Result of '{{ keyword }}'</h3>
+                <h5>{{ product?.length}} items found</h5>
+            </div>
+            <div id="items-found" class="py-10">
+                <ol class="
+                    grid grid-cols-2 gap-4 justify-items-center max-w-[1319px]
+                    md:grid-cols-3
+                    lg:grid-cols-4
+                ">
+                    <li v-for="item in product" :key="item.id">
+                        <Catalogue :id="stringToNumber(item.id)" :title="item.name" :image-src="item.product_image[2].image_url" :price="stringToNumber(item.price)"/>
+                    </li>
+                </ol>
+            </div>
+        </section>
 
         <div id="pagination" class="flex w-full justify-center items-center gap-4 py-10">
             <ButtonBgYellow sytle-css="rounded-[5px] text-bold p-1" @on-tap="onPreviousPage">
@@ -30,7 +31,7 @@
                 <Icon name="ic:outline-arrow-back-ios" size="27" class="rotate-180"/>
             </ButtonBgYellow>
         </div>        
-    </div>
+    </main>
 </template>
 
 <script setup lang="ts">
@@ -79,13 +80,6 @@ const { data: product, error, status ,refresh } = useLazyAsyncData('search-resul
     }
 })
 
-watch(status, () => {
-    if(status.value === 'success') {
-        console.log('status = ',product.value)
-    }
-    
-})
-
 const { data: rowCount, error: errorCount, status: statusCount } = useLazyAsyncData('row', async () => { 
     if (isQuery.value) {
         const { count, error } = await client.from('product').select(`*,product_image(id,image_url)`, { count: 'exact', head: true }).like('name', `%${keyword.value}%`)
@@ -127,7 +121,6 @@ const { data: rowCount, error: errorCount, status: statusCount } = useLazyAsyncD
             } else {
                 rowCount = Math.round(count / 12)
             }
-            
         }
 
         return rowCount

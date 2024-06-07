@@ -1,4 +1,9 @@
-import type { IProduct, IProductMutation, IProductCategory, IProductImage } from './product'
+import type { 
+    IProduct, IProductMutation, IProductCategory, IProductImage, 
+} from './product'
+import type { 
+    TUser , TUserAddress
+} from './user'
 
 export interface IDatabase {
     public: {
@@ -18,4 +23,21 @@ export interface IDatabase {
             }
         }
       }
+}
+
+export type TDatabase = {
+    public: {
+        Tables: {
+            user: {
+                Row : Prettify<TUser>,
+                Insert  : Prettify<TUser>,
+                Update  : Prettify<TUser>
+            },
+            user_address: {
+                Row : Prettify<Partial<TUserAddress>>,
+                Insert  : Prettify<Partial<TUserAddress>>,
+                Update  : Prettify<Partial<TUserAddress>>
+            }
+        }
+    }
 }

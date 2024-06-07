@@ -1,5 +1,5 @@
 <template>
-    <div class="absolute z-50 flex items-center justify-center w-screen h-screen bg-[#88888880] ">
+    <div class="absolute z-[999] flex items-center justify-center w-screen h-screen bg-[#88888880] ">
         <div class="loader"></div>
     </div>
 </template>

@@ -1,4 +1,6 @@
 <template>
+  <!-- <HomePage> -->
+  <!-- <NuxtErrorBoundary @error=logError> -->
   <main v-if="isMobile">
     <section v-if="profileStore.isLoading">
       <Loading />
@@ -24,7 +26,7 @@
             :key="cart.id"
           />
         </ol>
-        <BottomNavTransaction title="Total Payments" :total-payment="profileStore.totalPayment" title-button="checkout" @on-tap="submit"/>
+        <BottomNavTransaction title="Total Payment" :total-payment="profileStore.totalPayment" title-button="checkout" @on-tap="submit"/>
       </form>
     </section>
 
@@ -120,17 +122,24 @@
       <h2 class="font-Inconsolata tracking-[0.3em] font-black text-6xl">EMPTY</h2>
     </section>
   </main>
+  <!-- </NuxtErrorBoundary> -->
+  <!-- </HomePage> -->
 </template>
 
 <script setup lang="ts">
 import type { ICart } from '~/types/pages/cart';
 import type { TCheckout } from '~/types/checkout';
 import { useUserCheckout } from '~/stores/checkout';
+import HomePage from '~/layouts/home-page.vue';
 
 definePageMeta({
   layout: 'cart',
   middleware: 'auth'
 });
+
+const logError = (a: unknown) => {
+  console.log('error home page default slot = ',a);
+}
 
 const checkoutStore = useUserCheckout()
 

@@ -1,12 +1,12 @@
 <template>
-        <AppbarSearchMobile v-if="isMobile" :is-gray="true" bg="bg-third-color"/>
-        <AppbarSearch v-else/>
+        <AppbarSearchMobile v-show="isMobile" :is-gray="true" bg="bg-third-color"/>
+        <AppbarSearch v-show="!isMobile"/>
         <!-- <div :class="isMobile ? 'pt-[40px]' : 'pt-[50px]'"/> -->
         <slot>
 
         </slot>
-        <Bottomnav v-if="isMobile"/>
-        <Footer v-else />
+        <Bottomnav v-show="isMobile"/>
+        <Footer v-show="!isMobile" />
 </template>
 
 <script setup>

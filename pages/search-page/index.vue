@@ -8,7 +8,6 @@
 </template>
 
 <script setup lang="ts">
-import type { TSearchResult } from '~/types/components/searchResult';
 definePageMeta({
   layout: false
 })
