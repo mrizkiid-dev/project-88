@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.body {
+    @apply font-Inconsolata
+}
+
+.highlight-text {
+    @apply bg-primary px-5 py-2 -mb-0 inline-block text-third-color font-Inconsolata font-black text-2xl sm:text-5xl
+    md:text-7xl
+}
