@@ -20,19 +20,19 @@
                     <div class="flex flex-row gap-2 items-center ">
                         <p>Contact Name</p>
                         <p>:</p>
-                        <p>{{ profileStore.name }}</p>
+                        <p>{{ userDetail.name }}</p>
                     </div>
                     <div class="flex flex-row gap-2 items-center w-full">
                         <p>Address : </p>
-                        <p>{{ profileStore.additionalAddress }}</p>
+                        <p>{{ userDetail.detailAddress }}</p>
                     </div>
                     <div class="flex flex-row gap-2 items-center w-full">
                         <p>City : </p>
-                        <p>{{ profileStore.city.name }}</p>
+                        <p>{{ userDetail.province }}</p>
                     </div>
                     <div class="flex flex-row gap-2 w-full">
                         <p>Province : </p>
-                        <p>{{ profileStore.province.name }}</p>
+                        <p>{{ userDetail.city }}</p>
                     </div>
                     <div class="flex flex-row gap-2 items-center w-full">
                         <p>Phone Number : </p>
@@ -60,7 +60,7 @@
         </div>
         <!-- END #LEFT -->
 
-        <div id="right" class="flex-grow-[3] w-full flex flex-col gap-4">
+        <div id="right" class="flex-grow-[3] w-full md:max-w-[300px] flex flex-col gap-4">
             <div id="summary"
                 class="bg-third-color border-2 border-primary h-[350px] p-4 rounded-md shadow-[4px_4px_4px_0px_#A5A5A540] flex flex-col relative">
                 <h3 class="font-bold tracking-wide">Summary</h3>
@@ -110,7 +110,6 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router';
 import type { TOrdersItemComponent } from '~/types/components/order';
 
 const { isMobile } = useScreen()
@@ -129,6 +128,19 @@ type TDetailOrder = {
     }
 }
 
+type TUserDetail = {
+    name: string
+    province: string
+    city: string
+    detailAddress: string
+}
+const userDetail = ref<TUserDetail>({
+    name: '',
+    province: '',
+    city: '',
+    detailAddress: '',
+})
+
 const detailOrder = ref<TDetailOrder>({
     id: 0,
     createdAt: '',
@@ -142,16 +154,21 @@ const detailOrder = ref<TDetailOrder>({
 const itemOrder = ref<TOrdersItemComponent[]>([])
 
 if (route.params.id) {
-    const { data, error } = await supabaseClient.from('order').select('id,created_at,shipping_price,sub_total,total_payment,order_item(product_id,product_name,quantity,price,image_url)').eq('id',route.params.id).limit(1)
+    const { data, error } = await supabaseClient.from('order').select('id,name_receiver,detail_address,city,city_id,province,province_id,created_at,shipping_price,sub_total,total_payment,order_item(product_id,product_name,quantity,price,image_url)').eq('id',route.params.id).limit(1)
 
     if (data && data.length > 0) {
+        userDetail.value.name = data[0].name_receiver
+        userDetail.value.province = data[0].province
+        userDetail.value.city = data[0].city
+        userDetail.value.detailAddress = data[0].detail_address
+
         detailOrder.value.id = data[0].id
         detailOrder.value.subTotal = data[0].sub_total
         detailOrder.value.shipping.price = data[0].shipping_price
         detailOrder.value.totalPayment = data[0].total_payment
         detailOrder.value.createdAt = data[0].created_at
 
-        data[0].order_item.forEach(item => {
+        data[0].order_item.forEach((item: { product_id: number; product_name: string; image_url: string; quantity: number; price: number; }) => {
             let product = {} as TOrdersItemComponent
             product.id = item.product_id
             product.title = item.product_name

@@ -76,7 +76,7 @@
                 md:grid-cols-3
                 lg:grid-cols-4    
             ">
-            <li v-for="list in catalogue">
+            <li v-for="list in catalogue" :key="list.id">
                 <Catalogue :id="stringToNumber(list.id)" :title="list.name" :image-src="list.product_image[0].image_url" :price="stringToNumber(list.price)" :is-button-cart-disable="isCartButtonDisable" @on-tap-cart="onTapCart(list.id)"/>
             </li>
         </ol>
@@ -102,17 +102,19 @@ const isLoading = computed(() => loadingBestSeller.value || loadingCatalogue.val
 
 onMounted(async () => {
     profileStore.isLoading = true
+    console.log('user = ',user.value);
     
-    if (
-        (profileStore.uuid === null || profileStore.uuid === undefined || profileStore.uuid === '') &&
-        user.value !== null &&
-        user.value.identities &&
-        user.value.identities.length > 0 &&
-        user.value.identities[0].identity_data &&
-        user.value.identities[0].identity_data['name'] !== undefined &&
-        user.value?.id !== null &&
-        user.value?.email !== null
-    ) {
+    try {
+        if (
+            (profileStore.uuid === null || profileStore.uuid === undefined || profileStore.uuid === '') &&
+            user.value &&
+            user.value.identities &&
+            user.value.identities.length > 0 &&
+            user.value.identities[0].identity_data &&
+            user.value.identities[0].identity_data['name'] !== undefined &&
+            user.value?.id !== null &&
+            user.value?.email !== null
+        ) {
             const { count: dataUser, error: errorFetchUser } = await client
                 .from('user')
                 .select('*', { count: 'exact', head: true })
@@ -150,7 +152,13 @@ onMounted(async () => {
         }
         profileStore.isLoading = false
         
+    } catch (error) {
+        console.log('error mounted index.vue = ',error);
+        
+    } finally {
+        profileStore.isLoading = false
     }
+}
 )
 
 // BEST-SELLER
@@ -159,11 +167,7 @@ const { data: bestSeller, pending: loadingBestSeller, error: errorBestSeller, re
     const { data,error } = await client.from('product').select(`*,product_image(id,image_url)`).order('sell_out',{ ascending: false }).limit(7).returns<ICatalogue[]>()
     if (error) {
         console.log('error = ',error);   
-        throw createError({
-            statusMessage: error?.message,
-            statusCode: 404,
-            message: error?.message,
-        })
+        throw JSON.stringify(error)
     }
     return data
 },)
@@ -212,11 +216,7 @@ const { data: catalogue, pending: loadingCatalogue, error: errorCatalogue, refre
     const { data,error } = await client.from('product').select(`*,product_image(id,image_url)`).order('sell_out',{ ascending: false }).range(8, 19).returns<ICatalogue[]>()
     if (error) {
         console.log('error = ',error);   
-        throw createError({
-            statusMessage: error?.message,
-            statusCode: 404,
-            message: error?.message,
-        })
+        throw JSON.stringify(error)
     }
     return data
 },)
