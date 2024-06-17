@@ -17,7 +17,14 @@
             </div>
 
             <div id="searcbar" class="flex-[7] relative" >
-                <div class="min-w-[300px] border-4 border-primary rounded-full flex pl-6">
+                <div class="min-w-[300px] border-4 border-primary rounded-full flex items-center pl-2 ">
+                    <Icon name="eos-icons:loading" size="25"
+                        class="mr-1"
+                        :class="[
+                            {'visible': isSearchLoading},
+                            {'invisible': !isSearchLoading},
+                        ]"
+                    />
                     <input type="text"
                         class="
                             w-full
@@ -26,19 +33,20 @@
                         "
                         placeholder="Case Iphone Javascript"
                         v-model="searchAppBar"
-                        @keyup.enter="onPressEnter"
+                        @keyup.enter="onSearch"
                         autocomplete="off"
                     >
                     <div class="flex items-center gap-2">
-                        <Icon v-if="isSearchLoading" name="eos-icons:loading" size="25"/>
-                        <div class="flex items-center justify-center p-2 px-3 bg-primary rounded-r-[15px]">
+                        <div class="flex items-center justify-center p-2 px-3 bg-primary rounded-r-[15px] cursor-pointer" @click="onSearch">
                             <icon name="ion:search" size="25" color="#ffffffff"/>
                         </div>
                     </div>
                 </div>
 
                 <!-- searchResult -->
-                <div v-if="searchResult && searchResult.length > 0" id="search-result" class="absolute border-2 border-primary bg-third-color rounded-lg p-4 w-full flex flex-col gap-4 px-6 mt-1 max-h-[300px] overflow-y-scroll scroll-radius">
+                <div v-if="searchResult && searchResult.length > 0" id="search-result" 
+                    class="absolute border-2 border-primary bg-third-color rounded-lg p-4 w-full flex flex-col gap-4 px-6 mt-1 max-h-[300px] overflow-y-scroll scroll-radius"
+                >
                     <SearchSuggestion v-for="card in searchResult" :key="card.id" :id="card.id" :title="card.title" :image-src="card.image" />
                 </div>
             </div>
@@ -90,6 +98,7 @@
 
 <script setup lang="ts">
 const supabaseClient = useSupabaseClient()
+const { isMobile } = useScreen()
 const user = useSupabaseUser()
 const profileStore = useProfileStore()
 const {isSearchLoading, searchAppBar, searchResult} = useSearchProductAppBar()
@@ -135,7 +144,7 @@ const navigateToProfile = async () => {
     await navigateTo('/profile')
 }
 
-const onPressEnter = async () => {
+const onSearch = async () => {
     await navigateTo({
         path: '/search-result',
         query: {
