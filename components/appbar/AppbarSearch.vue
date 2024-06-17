@@ -101,7 +101,7 @@ const supabaseClient = useSupabaseClient()
 const { isMobile } = useScreen()
 const user = useSupabaseUser()
 const profileStore = useProfileStore()
-const {isSearchLoading, searchAppBar, searchResult} = useSearchProductAppBar()
+const {isSearchLoading, searchAppBar, searchResult, onDestroy} = useSearchProductAppBar()
 
 const isProfileShow = ref<boolean>(false)
 const userDetail = reactive<{
@@ -145,12 +145,14 @@ const navigateToProfile = async () => {
 }
 
 const onSearch = async () => {
-    await navigateTo({
+    navigateTo({
         path: '/search-result',
         query: {
             search: searchAppBar.value
         }
     })
+
+    onDestroy()
 }
 
 </script>
