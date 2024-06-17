@@ -57,12 +57,16 @@ const route = useRoute()
 
 const keyword = ref<string>('')
 const isQuery = ref<boolean>(false)
-if (Object.keys(route.query).length > 0) {
-    isQuery.value = true
-    if (route.query.search !== null && route.query.search !== undefined && route.query.hasOwnProperty('search')) {
-        keyword.value = route.query.search?.toString()
+
+const setKeyword = () => {
+    if (Object.keys(route.query).length > 0) {
+        isQuery.value = true
+        if (route.query.search !== null && route.query.search !== undefined && route.query.hasOwnProperty('search')) {
+            keyword.value = route.query.search?.toString()
+        }
     }
 }
+setKeyword()
 
 const page = ref<number>(1)
 const start = ref<number>(0)
@@ -140,6 +144,11 @@ const { data: rowCount, error: errorCount, status: statusCount } = useLazyAsyncD
         return rowCount
     }
 }) 
+
+watch(() => route.query.search, () => {
+    setKeyword()
+    refresh()
+})
 
 const onNextPage = () => {
     if(page.value < (rowCount?.value ?? 0)) {
