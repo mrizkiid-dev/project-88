@@ -1,5 +1,8 @@
 <template>
-    <main class="min-h-svh flex flex-col items-center justify-between py-[50px]" :class="[{'pt-[70px]': !isMobile}]">
+    <main v-if="pending" class="min-h-[60vh]">
+        <Loading />
+    </main>
+    <main v-else-if="product && product?.length > 0" class="min-h-svh flex flex-col items-center justify-between py-[50px]" :class="[{'pt-[70px]': !isMobile}]">
         <section>
             <div v-if="isQuery" class="flex flex-col w-full container px-5 pt-10 md:py-0">
                 <h3 class="font-bold">Result of '{{ keyword }}'</h3>
@@ -32,6 +35,17 @@
             </ButtonBgYellow>
         </div>        
     </main>
+
+    <main class="h-svh md:min-h-[45vh] flex justify-center items-center">
+        <section class="flex flex-col items-center justify-center gap-5 py-[100px]">
+            <NuxtImg src="/img/no-result.svg" :width="isMobile ? '200px' : '350px'" :height="isMobile ? '190px' : '340px'"/>
+            <article class="flex flex-col justify-center items-center font-Inconsolata text-primary md:ml-5">
+                <h3 class="font-black tracking-widest text-[30px] md:text-[40px]">no results found</h3>
+                <p>We couldn’t find you searched for</p>
+                <p>Try searching again</p>
+            </article>
+        </section>
+    </main>
 </template>
 
 <script setup lang="ts">
@@ -54,7 +68,7 @@ const page = ref<number>(1)
 const start = ref<number>(0)
 const offset = ref<number>(11)
 
-const { data: product, error, status ,refresh } = useLazyAsyncData('search-result', async () => {
+const { data: product, pending, error, status ,refresh } = useLazyAsyncData('search-result', async () => {
     if(isQuery.value) {
         const { data,error } = await client.from('product').select(`*,product_image(id,image_url)`).like('name', `%${keyword.value}%`).order('sell_out',{ ascending: false }).range(start.value, offset.value).returns<ICatalogue[]>()
         if (error) {
