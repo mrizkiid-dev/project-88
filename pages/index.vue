@@ -3,8 +3,8 @@
         <Loading />
     </Teleport>
     <header class="bg-secondary w-full h-[400px] md:h-[90vh] flex flex-row pt-[60px] background-grid-homepage">
-        <AddtocartNotification :is-show="true" @on-tap="onTap" />
-        <!-- isPopUpShow -->
+        <AddtocartNotification :is-show="isPopUpShow" @on-tap="onTap" />
+        
         <div class="flex flex-1 items-center justify-center">
             <div class="flex flex-col justify-start items-start border-third-color w-max-[50px]">
                 <span class="highlight-text">Go Grab</span>
@@ -17,7 +17,7 @@
         <div class="flex flex-1 items-end justify-center">
             <div class="container flex items-end h-[90%] max-w-[200px] md:max-w-[400px] ">
                 <div class="container bottom-0 flex justify-center items-center w-full">
-                    <img src="/img/hand-with-case.png" class="w-full" alt="" width="">
+                    <NuxtImg src="/img/hand-with-case.png" class="w-full" alt="" width="" />
                 </div>
             </div>
         </div>
