@@ -44,7 +44,7 @@ definePageMeta({
     // middleware: ['auth']
 })
 
-import type { Provider } from '~/node_modules/@supabase/gotrue-js/src/lib/types'
+import type { Provider } from '@supabase/auth-js/src/lib/types.ts'
 import type { ISignInForm } from '~/types/pages/auth';
 import type { ITextfieldError } from '~/types/components/textfield';
 import type { IDatabase } from '~/types/database/supabase';

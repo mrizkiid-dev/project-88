@@ -3,8 +3,8 @@
         <Loading />
     </Teleport>
     <header class="bg-secondary w-full h-[400px] md:h-[90vh] flex flex-row pt-[60px] background-grid-homepage">
-        <AddtocartNotification :is-show="isPopUpShow" @on-tap="onTap" />
-
+        <AddtocartNotification :is-show="true" @on-tap="onTap" />
+        <!-- isPopUpShow -->
         <div class="flex flex-1 items-center justify-center">
             <div class="flex flex-col justify-start items-start border-third-color w-max-[50px]">
                 <span class="highlight-text">Go Grab</span>
