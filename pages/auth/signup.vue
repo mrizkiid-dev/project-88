@@ -131,11 +131,11 @@ const signUp = async () => {
         const user = useSupabaseUser()
         if (user.value && user.value.id) {
             const { data, error } = await supabaseClient.from('user').insert([
-            { 
-                uuid: user.value?.id,
-                name: form.fullname,
-                email: form.email,
-            }
+                { 
+                    uuid: user.value?.id,
+                    name: form.fullname,
+                    email: form.email,
+                }
             ])
 
             if(error) {

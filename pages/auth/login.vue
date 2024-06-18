@@ -1,4 +1,7 @@
 <template>
+    <teleport v-if="profileStore.isLoading" to="#pop-up">
+        <Loading />
+    </teleport>
     <main class="flex justify-center pt-[100px] min-h-svh pb-10 h-full w-full font-Inconsolata">
         <div class="
             container mx-5 bg-third-color rounded-[25px] border-4 border-primary flex justify-center min-w-[320px]
@@ -30,8 +33,8 @@
                         </NuxtLink>
                     </div>
                 </form>
-                <div v-if="error.message" class="w-full bg-gray-darker text-error-red py-2 text-center rounded-[5px]">
-                    {{ error.message }}
+                <div v-if="errorLogin.value" class="w-full bg-gray-darker text-error-red py-2 text-center rounded-[5px]">
+                    Invalid Email and Password
                 </div>
             </div>
         </div>
@@ -44,16 +47,20 @@ definePageMeta({
     // middleware: ['auth']
 })
 
-import type { Provider } from '@supabase/auth-js/src/lib/types.ts'
+import type { Provider } from '@supabase/auth-js/src/lib/types'
 import type { ISignInForm } from '~/types/pages/auth';
 import type { ITextfieldError } from '~/types/components/textfield';
 import type { IDatabase } from '~/types/database/supabase';
 
+const profileStore = useProfileStore()
 const supabaseClient = useSupabaseClient<any>()
 const user = useSupabaseUser()
 
 console.log(user);
 
+onMounted(() => {
+    profileStore.isLoading = false
+})
 
 // AUTH
 const loginProvider = async(prov: Provider) => {
@@ -71,8 +78,17 @@ const loginPassword = async() => {
     },)
 
     if (error) {
-        error.message = error.message
+        // errorEmail.value = true
+        // errorPassword.value = true
+        errorLogin.value = true
+        errorLogin.message = error.message
+    } else {
+        profileStore.isLoading = true
+        await profileStore.initProfile()
+        profileStore.isLoading = false
+        navigateTo('/')
     }
+
     isButtonDisable.value = true
 }
 
@@ -88,7 +104,7 @@ const form = reactive<ISignInForm>({
 })
 
 //error
-const error = reactive<ITextfieldError>({
+const errorLogin = reactive<ITextfieldError>({
     value: false,
     message: ''
 })
@@ -161,13 +177,13 @@ const utils = {
     },
     setButtonDisable: function(isDisable: boolean, errorMessage?: string) {
         if (isDisable) {
-            error.value = isDisable
-            error.message = errorMessage ?? ''
-            isButtonDisable.value = error.value
+            errorLogin.value = isDisable
+            errorLogin.message = errorMessage ?? ''
+            isButtonDisable.value = errorLogin.value
         } else {
-            error.value = false
-            error.message = ''
-            isButtonDisable.value = error.value
+            errorLogin.value = false
+            errorLogin.message = ''
+            isButtonDisable.value = errorLogin.value
         }
     }
 }
