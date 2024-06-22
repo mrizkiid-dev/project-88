@@ -15,7 +15,7 @@
                 </div>
                 <div v-if="isTypingActive" id="text-input-mobile" class="border border-primary flex items-baseline justify-between rounded-full w-full min-w-[20px]" :class="isGray ? 'bg-[#ECECEC]' : 'bg-third-color'" >
                     <input ref="inputRef" ype="text" class="w-full ml-3 bg-transparent focus:outline-none placeholder:font-Inconsolata" v-model="searchAppBar" @keyup.enter="onPressEnter" autocomplete="off"/>
-                    <div class="p-2 pr-3 cursor-pointer" >
+                    <div class="p-2 pr-3 cursor-pointer" @click="onPressEnter">
                         <Icon name="ph:magnifying-glass" size="25" color="#3A3A3A" />
                     </div>
                 </div>
@@ -53,7 +53,7 @@ onMounted(() => {
 const inputRef = ref<HTMLInputElement|null>()
 
 const onTapSearchBar = () => {
-    onPressEnter
+    navigateTo('search-page')
 }
 
 const router = useRouter()
