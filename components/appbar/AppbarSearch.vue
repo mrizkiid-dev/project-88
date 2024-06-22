@@ -16,7 +16,12 @@
                 </div> -->
             </div>
 
-            <div id="searcbar" class="flex-[7] relative" >
+            <div v-if="searchResult && searchResult.length > 0" id="search-result" 
+                    class="fixed z-[90] top-0 left-0 right-0 h-screen w-full px-5 cursor-pointer" @click.self="onClosePopUp"
+                >
+            </div>
+
+            <div id="searcbar" class="flex-[7] relative z-[99]" >
                 <div class="min-w-[300px] border-4 border-primary rounded-full flex items-center pl-2 ">
                     <Icon name="eos-icons:loading" size="25"
                         class="mr-1"
@@ -45,7 +50,7 @@
 
                 <!-- searchResult -->
                 <div v-if="searchResult && searchResult.length > 0" id="search-result" 
-                    class="absolute border-2 border-primary bg-third-color rounded-lg p-4 w-full flex flex-col gap-4 px-6 mt-1 max-h-[300px] overflow-y-scroll scroll-radius"
+                    class="absolute z-[99] border-2 border-primary bg-third-color rounded-lg p-4 w-full flex flex-col gap-4 px-6 mt-1 max-h-[300px] overflow-y-scroll scroll-radius"
                 >
                     <SearchSuggestion v-for="card in searchResult" :key="card.id" :id="card.id" :title="card.title" :image-src="card.image" />
                 </div>
@@ -153,6 +158,10 @@ const onSearch = async () => {
     })
 
     onDestroy()
+}
+
+const onClosePopUp = () => {
+    searchResult.value = []
 }
 
 </script>
