@@ -9,10 +9,10 @@
             <form action="" class="flex flex-col justify-center md:flex-row md:gap-7 " @submit.prevent autocomplete="off">
                 <div id="form-left" class="flex flex-col w-full gap-3 md:flex-1">
                     <TextField title="Full Name" place-holder="example name" :is-mandatory="true" v-model="form.fullname" />
-                    <TextField title="Email" input-type="email" place-holder="example@email.com" :is-mandatory="true" v-model="form.email" :error="errorEmail" />
+                    <!-- <TextField title="Email" input-type="email" place-holder="example@email.com" :is-mandatory="true" v-model="form.email" :error="errorEmail" /> -->
                     <div class="flex flex-col justify-between h-full">
                         <TextField title="WA number" input-type="tel" place-holder="81xxxxxxxxx" v-model="form.waNumber" />
-                        <ButtonDarkMd :disable="isButtonDisable" v-if="!isMobile" title="save" style-css="max-w-[250px] md:min-h-[50px] mt-[10px]" @on-click="signUp"/>
+                        <ButtonDarkMd :disable="isButtonDisable" v-if="!isMobile" title="save" style-css="max-w-[250px] md:min-h-[50px] mt-[10px]" @on-click="onSignUp"/>
                     </div>
                 </div>
                 <div id="form-right" class="flex flex-col w-full gap-3 md:flex-1">
@@ -23,7 +23,7 @@
                     <!-- <DropdownForm title="District" v-model="form.district" place-holder="Antapani" empty-warning="city should not be empty"
                         :is-show-drop-down="isShowDropDown.district" :choose="districts" :loading="isDistrictLoading" @on-tap="onTapDistrict" @on-tap-drop-down="onTapDropDownDistrict"/> -->
                     <TextFieldArea title="Additional Address" :is-mandatory="false" place-holder="hi ka ...." v-model="form.address"/>
-                    <ButtonDarkMd :disable="isButtonDisable" v-if="isMobile" title="save" style-css="min-h-[40px] w-full" @on-click="signUp"/>
+                    <ButtonDarkMd :disable="isButtonDisable" v-if="isMobile" title="save" style-css="min-h-[40px] w-full" @on-click="onSignUp"/>
                 </div>
             </form>
             <b class="mt-10"><span class="text-[#CC0202]">*</span> Mandatory</b>
@@ -114,6 +114,7 @@ const { isMobile } = useScreen()
 const supabaseClient = useSupabaseClient<any>()
 const supabaseUser = useSupabaseUser()
 const profileStore = useProfileStore()
+const router = useRouter()
 
 type TUpdateUser = {
     fullname    : string
@@ -156,8 +157,33 @@ const state = reactive({
     },
 })
 
-const signUp = async () => {
-    
+const onSignUp = async () => {
+    const input = {
+        uuid: profileStore.uuid,
+        name: form.fullname,
+        nophone: form.waNumber,
+        provinceid: form.province?.id,
+        province: form.province?.name,
+        cityid: form.city?.id,
+        city: form.city?.name,
+        additionaladdress: form.address
+    }
+
+    let { data, error } = await useSupabaseClient<any>()
+        .rpc('update_profile', {
+            input
+        })
+        if (error) console.error(error)
+        else console.log(data)
+
+    if (error) {
+        console.error('Error updating user:', error);
+    } else {
+        console.log('User updated successfully');
+    }
+
+    await profileStore.initProfile()
+    router.back()
 }
 //pop up
 const closePopUp = () => {
