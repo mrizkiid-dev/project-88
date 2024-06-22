@@ -8,6 +8,12 @@ export const useSearchProductAppBar = () => {
         onInput(search)
     })
 
+    const onChange = (event: Event) => {
+        const target = event.target as HTMLInputElement;
+        const value = target.value;
+        onInput(value)
+    }
+
     const isSearchLoading = ref<boolean>(false)
     const searchResult = ref<TSearchResult[]>([])
     const setSearchResult = async (search: string | null) => {
@@ -18,7 +24,7 @@ export const useSearchProductAppBar = () => {
                 const { data, error } = 
                 await supabaseClient.from('product')
                     .select('id,name,price,product_image(image_url)')
-                    .like('name', `%${search}%`)
+                    .ilike('name', `%${search}%`)
                     .limit(10)
                     .returns<{
                             id: number | string,
@@ -71,6 +77,7 @@ export const useSearchProductAppBar = () => {
         isSearchLoading,
         searchAppBar,
         searchResult,
+        onChange,
         onDestroy
     }
 }
