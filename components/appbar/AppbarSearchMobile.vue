@@ -53,7 +53,7 @@ onMounted(() => {
 const inputRef = ref<HTMLInputElement|null>()
 
 const onTapSearchBar = () => {
-    navigateTo('search-page')
+    onPressEnter
 }
 
 const router = useRouter()
