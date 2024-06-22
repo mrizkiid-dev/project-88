@@ -2,7 +2,7 @@
     <Teleport v-if="profileStore.isLoading || isLoading" to="#pop-up">
         <Loading />
     </Teleport>
-    <header class="bg-secondary w-full h-[400px] md:h-[90vh] flex flex-row pt-[60px] background-grid-homepage">
+    <header class="bg-secondary w-full h-[400px] md:h-[90vh] md:max-h-[1000px] flex flex-row pt-[60px] background-grid-homepage">
         <AddtocartNotification :is-show="isPopUpShow" @on-tap="onTap" />
         
         <div class="flex flex-1 items-center justify-center">

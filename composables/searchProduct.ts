@@ -4,15 +4,10 @@ export const useSearchProductAppBar = () => {
     const supabaseClient = useSupabaseClient()
         // search app bar
     const searchAppBar = ref<string>('')
+    
     watch(searchAppBar, (search) => {
         onInput(search)
     })
-
-    const onChange = (event: Event) => {
-        const target = event.target as HTMLInputElement;
-        const value = target.value;
-        onInput(value)
-    }
 
     const isSearchLoading = ref<boolean>(false)
     const searchResult = ref<TSearchResult[]>([])
@@ -77,7 +72,6 @@ export const useSearchProductAppBar = () => {
         isSearchLoading,
         searchAppBar,
         searchResult,
-        onChange,
         onDestroy
     }
 }

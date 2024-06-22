@@ -15,7 +15,7 @@
                     lg:grid-cols-4
                 ">
                     <li v-for="item in product" :key="item.id">
-                        <Catalogue :id="stringToNumber(item.id)" :title="item.name" :image-src="item.product_image[2].image_url" :price="stringToNumber(item.price)"/>
+                        <Catalogue :id="stringToNumber(item.id)" :title="item.name" :image-src="item.product_image[0].image_url" :price="stringToNumber(item.price)"/>
                     </li>
                 </ol>
             </div>
@@ -74,7 +74,7 @@ const offset = ref<number>(11)
 
 const { data: product, pending, error, status ,refresh } = useLazyAsyncData('search-result', async () => {
     if(isQuery.value) {
-        const { data,error } = await client.from('product').select(`*,product_image(id,image_url)`).like('name', `%${keyword.value}%`).order('sell_out',{ ascending: false }).range(start.value, offset.value).returns<ICatalogue[]>()
+        const { data,error } = await client.from('product').select(`*,product_image(id,image_url)`).ilike('name', `%${keyword.value}%`).order('sell_out',{ ascending: false }).range(start.value, offset.value).returns<ICatalogue[]>()
         if (error) {
             console.log('error = ',error);   
             throw createError({
@@ -100,7 +100,7 @@ const { data: product, pending, error, status ,refresh } = useLazyAsyncData('sea
 
 const { data: rowCount, error: errorCount, status: statusCount } = useLazyAsyncData('row', async () => { 
     if (isQuery.value) {
-        const { count, error } = await client.from('product').select(`*,product_image(id,image_url)`, { count: 'exact', head: true }).like('name', `%${keyword.value}%`)
+        const { count, error } = await client.from('product').select(`*,product_image(id,image_url)`, { count: 'exact', head: true }).ilike('name', `%${keyword.value}%`)
         if (error) {
             console.log('errorCount = ',error);   
             throw createError({

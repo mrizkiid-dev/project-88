@@ -1,5 +1,5 @@
 <template>
-    <AppbarSearchMobile :is-typing-active="true" :is-gray="true" in-style="bg-third-color border-b-[1px] border-primary" v-model="searchAppBar" @on-input="onChange"/>
+    <AppbarSearchMobile :is-typing-active="true" :is-gray="true" in-style="bg-third-color border-b-[1px] border-primary" v-model="searchAppBar"/>
     <!-- <Loading v-if="isSearchLoading" /> -->
     <div class="px-2 flex flex-col gap-2 py-[100px]">
       <div v-show="isSearchLoading" class="flex justify-center">
@@ -17,6 +17,6 @@ definePageMeta({
 
 const supabaseClient = useSupabaseClient()
 
-const {isSearchLoading, searchAppBar, searchResult, onChange} = useSearchProductAppBar()
+const {isSearchLoading, searchAppBar, searchResult} = useSearchProductAppBar()
 
 </script>
