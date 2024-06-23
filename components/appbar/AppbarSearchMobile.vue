@@ -43,22 +43,18 @@ const { isGray, bg, inStyle } = defineProps<{
     inStyle?: string,
     isTypingActive?: boolean,
 }>()
-
-const emit = defineEmits(['onInput'])
-
-const searchAppBar = defineModel<string>()
-
 onMounted(() => {
     inputRef.value?.focus()
 })
+const router = useRouter()
 
+const searchAppBar = defineModel<string>()
 const inputRef = ref<HTMLInputElement|null>()
 
 const onTapSearchBar = () => {
     navigateTo('search-page')
 }
 
-const router = useRouter()
 const onTapBack = () => {
     router.back()
 }
@@ -67,10 +63,9 @@ const onPressEnter = async () => {
     await navigateTo({
         path: '/search-result',
         query: {
-            search: searchAppBar.value
+            search: searchAppBar.value?.trim()
         }
     })
 }
-
 
 </script>

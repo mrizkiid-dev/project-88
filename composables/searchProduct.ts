@@ -6,7 +6,7 @@ export const useSearchProductAppBar = () => {
     const searchAppBar = ref<string>('')
     
     watch(searchAppBar, (search) => {
-        onInput(search)
+        onInput(search.trim())
     })
 
     const isSearchLoading = ref<boolean>(false)
