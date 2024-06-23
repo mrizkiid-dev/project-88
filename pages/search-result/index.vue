@@ -36,7 +36,7 @@
         </div>        
     </main>
 
-    <main class="h-svh md:min-h-[45vh] flex justify-center items-center">
+    <main v-else class="h-svh md:min-h-[45vh] flex justify-center items-center">
         <section class="flex flex-col items-center justify-center gap-5 py-[100px]">
             <NuxtImg src="/img/no-result.svg" :width="isMobile ? '200px' : '350px'" :height="isMobile ? '190px' : '340px'"/>
             <article class="flex flex-col justify-center items-center font-Inconsolata text-primary md:ml-5">
