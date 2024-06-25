@@ -27,6 +27,8 @@
                     <p id="description" class="text-base md:text-lg">{{ description }}</p>
                     <div class="w-full">
                         <span class="font-black text-third-color inline-block text-lg px-3 py-2 bg-primary md:text-xl">Rp. {{ price }}</span>
+                        <br>
+                        <p class="mt-3 font-black text-primary border border-primary inline-block text-sm px-2 py-1 bg-third-color md:text-base">{{ qty }} pcs</p>
                     </div>
                 </div>
                 <ButtonBgYellow sytle-css="w-full mx-auto md:w-[500px] border-2 border-primary" @on-tap="submit">
@@ -63,6 +65,7 @@ const user = useSupabaseUser()
 const title = ref<string>('')
 const description = ref<string>('')
 const price = ref<string>('')
+const qty = ref<number>(0)
 const product = ref<ICatalogue[]>([])
 
 onMounted(() => {
@@ -78,18 +81,15 @@ onMounted(() => {
         title.value = data.value[0].name
         description.value = data.value[0].desc
         price.value = data.value[0].price
+        qty.value = data.value[0].qty
     }
 })
 
 const { data, pending, error, status, refresh } = useLazyAsyncData('product-detail', async () => {
     const { data,error } = await client.from('product').select(`*,product_image(id,image_url)`).order('sell_out',{ ascending: false }).eq(`id`,route.params.id).limit(1).returns<ICatalogue[]>()
     if (error) {
-        console.log('error = ',error);   
-        throw createError({
-            statusMessage: error?.message,
-            statusCode: 404,
-            message: error?.message,
-        })
+        console.log('error = ',JSON.stringify(error))  
+        throw JSON.stringify(error)
     }
     return data
 },)
@@ -169,6 +169,9 @@ const submit = async () => {
             if (error) {
                 throw JSON.stringify(error)
             }
+        } else {
+            isLoading.value = false
+            navigateTo('/auth/login')
         }
     } catch (error) {
         console.log('ERROR! submit product detail = ',error);

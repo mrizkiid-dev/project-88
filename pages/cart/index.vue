@@ -137,10 +137,6 @@ definePageMeta({
   middleware: 'auth'
 });
 
-const logError = (a: unknown) => {
-  console.log('error home page default slot = ',a);
-}
-
 const checkoutStore = useUserCheckout()
 
 onMounted(async () => {
@@ -217,15 +213,17 @@ const deleteCart = async (item: ICart) => {
   profileStore.cart.splice(position,1)
 
   // delete cheked if check true before deleted
-  const positionCheck = checked.value.indexOf(item.id)
-  checked.value.splice(positionCheck,1)
-  
-  const { error } = await useSupabaseClient()
-  .from('cart_item')
-  .delete()
-  .eq('id', item.id)
+  if (item.cartId) {
+    const positionCheck = checked.value.indexOf(item.cartId)
+    checked.value.splice(positionCheck,1)
 
-  console.log('error cart= ',error);
+    const { error } = await useSupabaseClient()
+    .from('cart_item')
+    .delete()
+    .eq('id', item.cartId)
+
+    console.log('error cart= ',error);
+  }
   
 }
 
@@ -244,6 +242,7 @@ const submit = () => {
   let checkoutItem : TCheckout
   result.forEach(cart => {
     checkoutItem = {} as TCheckout
+    checkoutItem.cartId = cart.cartId
     checkoutItem.id = cart.id
     checkoutItem.title = cart.title
     checkoutItem.imageSrc = cart.imageSrc

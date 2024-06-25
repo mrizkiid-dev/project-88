@@ -9,7 +9,7 @@ export interface IProductTable{
     desc        : string
     price       : string
     discount    : string | number
-    qty         : string | number
+    qty         : number
     sell_out    : string | number
     created_at  : string
     modified_at : string

@@ -429,30 +429,48 @@ const onDestroyModalAddress =() => {
 const submit = async() => {
     try {
       profileStore.isLoading = true
-      const { data, error } = await supabaseClient.from('order').insert([
-        {
-          shopping_session_id: profileStore.sessionId,
-          name_receiver: profileStore.name,
-          detail_address: profileStore.additionalAddress,
-          city_id: profileStore.city.id,
-          city: profileStore.city.name,
-          province_id: profileStore.province.id,
-          province: profileStore.province.name,
-          sub_total: checkoutStore.subTotal,
-          total_payment: checkoutStore.totalPayment,
-          shipping_price: checkoutStore.shipping.price,
-        }
-      ]).select('id').limit(1)
-
-      if (error) {
-        throw JSON.stringify(error)
-      }
+      // const { data, error } = await supabaseClient.from('order').insert([
+      //   {
+      //     shopping_session_id: profileStore.sessionId,
+      //     name_receiver: profileStore.name,
+      //     detail_address: profileStore.additionalAddress,
+      //     city_id: profileStore.city.id,
+      //     city: profileStore.city.name,
+      //     province_id: profileStore.province.id,
+      //     province: profileStore.province.name,
+      //     sub_total: checkoutStore.subTotal,
+      //     total_payment: checkoutStore.totalPayment,
+      //     shipping_price: checkoutStore.shipping.price,
+      //   }
+      // ]).select('id').limit(1)
+ 
+      // if (error) {
+      //   throw JSON.stringify(error)
+      // }
       
-      if (data !== null && isNonEmptyArray(data)) {
-        const orderItemBody = checkoutStore.products.map((product) => {
-          profileStore.deleteCart(product.id)
+      // if (data !== null && isNonEmptyArray(data)) {
+      //   const orderItemBody = checkoutStore.products.map((product) => {
+      //     profileStore.deleteCart(product.id)
+      //     return {
+      //       order_id: data[0].id,
+      //       product_id: product.id,
+      //       product_name: product.title,
+      //       image_url: product.imageSrc,
+      //       price: product.price,
+      //       quantity: product.qty,
+      //     } 
+      //   })
+
+      //   const { error } = await supabaseClient.from('order_item').insert(orderItemBody)
+      //   if (error) {
+      //     throw JSON.stringify(error)
+      //   }
+
+      const orderItemBody = checkoutStore.products.map((product) => {
+          if (product.cartId) {
+            profileStore.deleteCart(product.cartId)
+          }
           return {
-            order_id: data[0].id,
             product_id: product.id,
             product_name: product.title,
             image_url: product.imageSrc,
@@ -461,10 +479,33 @@ const submit = async() => {
           } 
         })
 
-        const { error } = await supabaseClient.from('order_item').insert(orderItemBody)
-        if (error) {
-          throw JSON.stringify(error)
-        }
+      const { data, error } = await supabaseClient
+        .rpc('create_order', {
+          _order: {
+            shopping_session_id: profileStore.sessionId,
+            name_receiver: profileStore.name,
+            detail_address: profileStore.additionalAddress,
+            city_id: profileStore.city.id,
+            city: profileStore.city.name,
+            province_id: profileStore.province.id,
+            province: profileStore.province.name,
+            sub_total: checkoutStore.subTotal,
+            total_payment: checkoutStore.totalPayment,
+            shipping_price: checkoutStore.shipping.price,
+          },
+          _order_item: orderItemBody
+        })
+        .returns<{
+          status: string
+          message: string
+          order_id?: number
+        } | undefined>()
+
+      // Check for errors
+      if (error) {
+        console.error('Error creating order:', JSON.stringify(error))
+        throw JSON.stringify(error)
+      }
 
         const itemDetails = checkoutStore.products.map<TMidItemDetails>((product) => {
           return {
@@ -501,7 +542,8 @@ const submit = async() => {
           }
         }
 
-        const midtransId = 'TEST'+ Math.floor(Math.random()*100) + data[0].id
+        // const midtransId = 'PR88-staging-'+ Math.floor(Math.random()*100) + data[0].id
+        const midtransId = 'PR88-staging-'+ Math.floor(Math.random()*100) + data?.order_id
 
         const response = await $fetch('/api/shipping/midtrans-token',{
           method: 'POST',
@@ -517,16 +559,16 @@ const submit = async() => {
           const { error } = await supabaseClient.from('order').update({
             midtrans_id: midtransId,
             midtrans_token: response.token,
-          }).eq('id', data[0].id)
+          }).eq('id', data?.order_id)
 
           if ( !error ) {
-            navigateTo(`/payment/${data[0].id}`)
+            navigateTo(`/payment/${data?.order_id}`)
           } else {
             hasError.payment = true
             throw JSON.stringify(error)
           }
         }
-      }
+      // }
     } catch (error) {
       console.log('ERROR! sumbit pay = ',error);
       hasError.value = true

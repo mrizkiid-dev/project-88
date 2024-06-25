@@ -1,4 +1,5 @@
 export type TCheckout = {
+    cartId?: number,
     id: number
     title: string
     imageSrc: string

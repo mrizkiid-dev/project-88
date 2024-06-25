@@ -29,7 +29,7 @@ const emit = defineEmits<{
     click: []
 }>()
 
-const checked = defineModel<number[]>('checked')
+const checked = defineModel('checked')
 
 const increase = () => {
     emit('increase')

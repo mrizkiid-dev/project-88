@@ -50,7 +50,8 @@ export const useProfileStore = defineStore('profile-store', {
                             console.log('cart = ',cart);
                             
                             cart_temp = {} as ICart
-                            cart_temp.id = cart.id,
+                            cart_temp.cartId = cart.id
+                            cart_temp.id = cart.product.id
                             // cart_temp.productId = cart.product.id
                             cart_temp.title = cart.product.name
                             cart_temp.price = cart.product.price
@@ -78,7 +79,7 @@ export const useProfileStore = defineStore('profile-store', {
                         .select(`uuid,name,email,shopping_session(id,sub_total,total_payment),user_address(whatsapp_number,province_id,province,city_id,city,district,additional_address)`)
                         .eq('uuid',useSupabaseUser().value?.id).limit(1)
                     if (error) {
-                        throw new Error(JSON.stringify(error));
+                        throw JSON.stringify(error);
                     }
 
                     if (data !== null && data.length > 0 && error === null) {
