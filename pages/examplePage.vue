@@ -1,43 +1,49 @@
 <template>
-    <main class="pt-[60px]">
-        
-        <!-- <p>{{ result }}</p> -->
-    </main>
-</template>
+    <div class="marquee">
+      <div class="marquee__inner">
+        <span>Welcome to our store | We have a lot of merch design that perhaps suit with your preferences | These are our best seller |</span>
+        <span>Welcome to our store | We have a lot of merch design that perhaps suit with your preferences | These are our best seller |</span>
+      </div>
+    </div>
+  </template>
+  
+  
+  
+  
+  <script setup>
+  import { computed } from 'vue';
+  definePageMeta({
+    layout: false
+})
+  </script>
+  
+  <style scoped>
+.marquee {
+  overflow: hidden;
+  white-space: nowrap;
+  box-sizing: border-box;
+  width: 100%;
+}
 
-<script setup lang="ts">
-import type { TCostPost } from '~/types/api/cost-post';
-
-const { isMobile } = useScreen()
-const client = useSupabaseClient()
-
-const isLoading = ref<boolean>(false)
-
-onMounted(
-    async () => {
-        const input = {
-            name: 'name test jun 21',
-            nophone: 892222222222,
-            provinceid: '21',
-            province: 'jawa barat test jun 21',
-            cityid: '21',
-            city: 'bandung test jun 21',
-            additionaladdress: 'rt 003 rw 004 test jun 21',
-            postalcode: 45363,
-        }
-
-
-        let { data, error } = await useSupabaseClient<any>()
-        .rpc('update_profile', {
-            input
-        })
-        if (error) console.error(error)
-        else console.log(data)
-    }
-)
+.marquee__inner {
+  display: inline-block;
+  white-space: nowrap;
+  will-change: transform;
+  animation: marquee 30s linear infinite;
+}
 
 
 
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+</style>
 
+  
 
-</script>
+  

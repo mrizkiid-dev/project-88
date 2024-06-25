@@ -193,10 +193,12 @@ const onTapChecBox = (cart: ICart) => {
 }
 
 const increment = (item: ICart) => {
-  item.quantity = item.quantity + 1;
-  if ( checked.value.find((e) => {return e === item.id}) ) {
-    profileStore.subTotal += item.price
-    profileStore.totalPayment = profileStore.subTotal
+  if (item.quantity < item.maxQty) {
+    item.quantity = item.quantity + 1;
+    if ( checked.value.find((e) => {return e === item.id}) ) {
+      profileStore.subTotal += item.price
+      profileStore.totalPayment = profileStore.subTotal
+    }
   }
 }
 const decrement = (item: ICart) => {

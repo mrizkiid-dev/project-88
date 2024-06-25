@@ -7,7 +7,7 @@
                 <h2 class="font-Inconsolata tracking-wider text-xl md:block hidden">- payment -</h2>
                 <NuxtImg src="/img/pay.svg" width="300px" height="600px" class="mt-10  md:block hidden"/>
                 <p class="font-Inconsolata tracking-wider text-base mt-10 text-center md:block hidden">Project-88 keeps <br> your information and payment safe</p>
-                <ButtonDarkMd v-if="!isMobile" title="home page" style-css="inline-block w-[200px] mt-10" @on-click="goHomePage"/>
+                <ButtonDarkMd v-if="!isMobile" title="home page" style-css="max-w-[200px] mt-10" @on-click="goHomePage"/>
             </div>
             <div v-if="isTokenExist" id="snap-container" class="h-[90vh] md:w-[60vw] w-screen md:h-svh border bg-third-color"/>
             <div v-else class="h-screen md:w-[60vw] w-screen md:h-svh border bg-third-color flex flex-col items-center justify-center gap-2">

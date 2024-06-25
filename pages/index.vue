@@ -25,14 +25,14 @@
     </header>
 
     <section id="best-seller" class="bg-primary relative pt-3 text-third-color tracking-widest font-Inconsolata px-1 sm:px-4 md:px-10 w-full">
-        <div id="headline" class="marquee-w text-xl md:text-2xl">
+        <!-- <div id="headline" class="marquee-w text-xl md:text-2xl">
             <div class="marquee">
                 <span>{{ headline }}&nbsp;</span> 
             </div>
-            <!-- <div class="marquee marquee2">
+            <div class="marquee marquee2">
                 <span>{{ headline }}</span>
-            </div> -->
-        </div>
+            </div>
+        </div> -->
         <div v-if="!loadingBestSeller && bestSeller" class="relative">
 
             <div class="text-5xl font-black flex flex-col justify-center items-start visible absolute z-[1] pr-5 h-full md:text-7xl">

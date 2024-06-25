@@ -46,12 +46,14 @@ export const useProfileStore = defineStore('profile-store', {
                     
                     if(data !== null && error === null) {
                         let cart_temp: ICart
+                        let ids = [] as number[]
                         data.forEach(cart => {
                             console.log('cart = ',cart);
-                            
+                            ids.push(cart.product.id)
                             cart_temp = {} as ICart
                             cart_temp.cartId = cart.id
                             cart_temp.id = cart.product.id
+                            cart_temp.maxQty = 0
                             // cart_temp.productId = cart.product.id
                             cart_temp.title = cart.product.name
                             cart_temp.price = cart.product.price
@@ -62,6 +64,7 @@ export const useProfileStore = defineStore('profile-store', {
                             cart_temp.imageSrc = cart.product.product_image[0].image_url
                             this.cart.push(cart_temp)
                         });
+                        await this.initMaxQts(ids)
                     }
         
                     if (error) {
@@ -147,5 +150,28 @@ export const useProfileStore = defineStore('profile-store', {
                 .delete()
                 .eq('id', id)
         },
+        async initMaxQts(ids: number[]) {
+            let { data, error } = await useSupabaseClient<any>()
+                .rpc('get_qtys', {
+                ids
+                }).returns<{
+                    status: string,
+                    message: string,
+                    data: [{
+                        id: number,
+                        qty: number,
+                    }]
+                }>()
+
+                // result := json_build_object('status', 'success', 'message', 'Quantity retrieved successfully', 'data', result_temp);
+
+            if (error) console.error(error)
+            else {
+                data?.data.forEach(qty => {
+                    let cart_temp = this.cart.find((item) => item.id === qty.id)
+                    if (cart_temp) cart_temp.maxQty = qty.qty
+                });
+            }
+        }
     },
 })
