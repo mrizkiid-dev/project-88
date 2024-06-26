@@ -274,11 +274,9 @@ const onTapCart = async (id: string | number) => {
         } else {
             console.log(error);
             
-        }
-        
-        } else {
-            navigateTo('/auth/login')
-        }
+        }}
+    } else {
+        navigateTo('/auth/login')
     }
     isCartButtonDisable.value = false
 }
