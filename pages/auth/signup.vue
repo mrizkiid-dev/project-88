@@ -246,6 +246,7 @@ watch(() => form.province, async () => {
     form.city = null
     form.district = null
     if (form.province) {
+        cities.value = []
         isCityLoading.value = true
         form.district = null
         try {
