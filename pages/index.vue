@@ -166,7 +166,7 @@ const headline = ref<string>(` Welcome to our store | We have a lot of merch des
 const { data: bestSeller, pending: loadingBestSeller, error: errorBestSeller, refresh } = useLazyAsyncData('best-seller', async () => {
     const { data,error } = await client.from('product').select(`*,product_image(id,image_url)`).order('sell_out',{ ascending: false }).limit(7).returns<ICatalogue[]>()
     if (error) {
-        console.log('error = ',JSON.stringify(error));   
+        console.log('error best-seller = ',JSON.stringify(error));   
         throw JSON.stringify(error)
     }
     return data
@@ -215,7 +215,7 @@ const scrollBestSeller = () => {
 const { data: catalogue, pending: loadingCatalogue, error: errorCatalogue, refresh: refreshCatalogue } = useLazyAsyncData('catalogue', async () => {
     const { data,error } = await client.from('product').select(`*,product_image(id,image_url)`).order('sell_out',{ ascending: false }).range(8, 19).returns<ICatalogue[]>()
     if (error) {
-        console.log('error = ',JSON.stringify(error));   
+        console.log('error catalogue = ',JSON.stringify(error));   
         throw JSON.stringify(error)
     }
     return data

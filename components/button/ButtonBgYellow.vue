@@ -1,5 +1,5 @@
 <template>
-    <button :disabled="disabled" @click="onTap" class="rounded-md text-primary " 
+    <button :disabled="disabled" @click="onTap" class="rounded-md text-primary cursor-pointer" 
             :class="[
                 sytleCss,
                 {'bg-gray-darker': disabled}, 

@@ -85,7 +85,7 @@ onMounted(() => {
     }
 })
 
-const { data, pending, error, status, refresh } = useLazyAsyncData('product-detail', async () => {
+const { data, pending, error, status, refresh } = useLazyAsyncData('product-detail0626', async () => {
     const { data,error } = await client.from('product').select(`*,product_image(id,image_url)`).order('sell_out',{ ascending: false }).eq(`id`,route.params.id).limit(1).returns<ICatalogue[]>()
     if (error) {
         console.log('error = ',JSON.stringify(error))  
@@ -114,6 +114,7 @@ watch(status, () => {
         title.value = data.value[0].name
         description.value = data.value[0].desc
         price.value = data.value[0].price
+        qty.value = data.value[0].qty
     }
 })
 
