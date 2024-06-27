@@ -183,6 +183,7 @@ const onSignUp = async () => {
     }
 
     await profileStore.initProfile()
+    await profileStore.initAddress()
     router.back()
 }
 //pop up
