@@ -24,7 +24,8 @@
 
     </header>
 
-    <section class="running-text">
+    <ClientOnly>
+        <section class="running-text">
             <!-- <p class="marquee-first">
                 <span>{{ headline }}  &nbsp;</span>
             </p> -->
@@ -36,7 +37,8 @@
                 <span v-if="!isMobile">{{ headline }}{{ headline }}  &nbsp;</span>
                 <span v-else>Welcome to Project88 ☀️Welcome to Project88 ☀️ Welcome to Project88 ☀️&nbsp;</span>
             </p>
-    </section>
+        </section>
+    </ClientOnly>
 
     <section id="best-seller" v-if="!loadingBestSeller && bestSeller" class="bg-primary relative pt-3 text-third-color tracking-widest font-Inconsolata px-1 sm:px-4 md:px-10 w-full">
         <!-- <div id="headline" class="marquee-w text-xl md:text-2xl">
