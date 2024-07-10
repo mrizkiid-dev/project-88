@@ -5,7 +5,7 @@ export const useScreen = () => {
     const isMobile = ref<boolean>(false)
 
     const setMobileScreen = (width: number) => {
-        if(width <= 760) {
+        if(width <= 768) {
             isMobile.value = true
         } else {
             isMobile.value = false

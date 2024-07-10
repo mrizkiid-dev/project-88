@@ -24,7 +24,21 @@
 
     </header>
 
-    <section id="best-seller" class="bg-primary relative pt-3 text-third-color tracking-widest font-Inconsolata px-1 sm:px-4 md:px-10 w-full">
+    <section class="running-text">
+            <!-- <p class="marquee-first">
+                <span>{{ headline }}  &nbsp;</span>
+            </p> -->
+            <p class="marquee">
+                <span v-if="!isMobile">{{ headline }}{{ headline }}  &nbsp;</span>
+                <span v-else>Welcome to Project88 ☀️ Welcome to Project88 ☀️ Welcome to Project88 ☀️&nbsp;</span>
+            </p>
+            <p class="marquee marquee2">
+                <span v-if="!isMobile">{{ headline }}{{ headline }}  &nbsp;</span>
+                <span v-else>Welcome to Project88 ☀️Welcome to Project88 ☀️ Welcome to Project88 ☀️&nbsp;</span>
+            </p>
+    </section>
+
+    <section id="best-seller" v-if="!loadingBestSeller && bestSeller" class="bg-primary relative pt-3 text-third-color tracking-widest font-Inconsolata px-1 sm:px-4 md:px-10 w-full">
         <!-- <div id="headline" class="marquee-w text-xl md:text-2xl">
             <div class="marquee">
                 <span>{{ headline }}&nbsp;</span> 
@@ -33,7 +47,7 @@
                 <span>{{ headline }}</span>
             </div>
         </div> -->
-        <div v-if="!loadingBestSeller && bestSeller" class="relative">
+        <div class="relative">
 
             <div class="text-5xl font-black flex flex-col justify-center items-start visible absolute z-[1] pr-5 h-full md:text-7xl">
                 <p>Best</p>
@@ -281,3 +295,7 @@ const onTapCart = async (id: string | number) => {
     isCartButtonDisable.value = false
 }
 </script>
+
+<style>
+    @import '@/assets/css/running-text.css';
+</style>
