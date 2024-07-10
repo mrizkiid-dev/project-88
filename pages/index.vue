@@ -25,17 +25,15 @@
     </header>
 
     <ClientOnly>
-        <section class="running-text">
+        <section v-if="!isMobile" class="running-text">
             <!-- <p class="marquee-first">
                 <span>{{ headline }}  &nbsp;</span>
             </p> -->
             <p class="marquee">
-                <span v-if="!isMobile">{{ headline }}{{ headline }}  &nbsp;</span>
-                <span v-else>Welcome to Project88 ☀️ Welcome to Project88 ☀️ Welcome to Project88 ☀️&nbsp;</span>
+                <span>{{ headline }}{{ headline }}  &nbsp;</span>
             </p>
             <p class="marquee marquee2">
-                <span v-if="!isMobile">{{ headline }}{{ headline }}  &nbsp;</span>
-                <span v-else>Welcome to Project88 ☀️Welcome to Project88 ☀️ Welcome to Project88 ☀️&nbsp;</span>
+                <span>{{ headline }}{{ headline }}  &nbsp;</span>
             </p>
         </section>
     </ClientOnly>
