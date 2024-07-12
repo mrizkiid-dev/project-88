@@ -151,7 +151,8 @@ export const useProfileStore = defineStore('profile-store', {
                 .eq('id', id)
         },
         async initMaxQts(ids: number[]) {
-            let { data, error } = await useSupabaseClient<any>()
+            if(ids.length > 0) {
+                let { data, error } = await useSupabaseClient<any>()
                 .rpc('get_qtys', {
                 ids
                 }).returns<{
@@ -165,12 +166,13 @@ export const useProfileStore = defineStore('profile-store', {
 
                 // result := json_build_object('status', 'success', 'message', 'Quantity retrieved successfully', 'data', result_temp);
 
-            if (error) console.error(error)
-            else {
-                data?.data.forEach(qty => {
-                    let cart_temp = this.cart.find((item) => item.id === qty.id)
-                    if (cart_temp) cart_temp.maxQty = qty.qty
-                });
+                if (error) console.error(error)
+                else {
+                    data?.data.forEach(qty => {
+                        let cart_temp = this.cart.find((item) => item.id === qty.id)
+                        if (cart_temp) cart_temp.maxQty = qty.qty
+                    });
+                }
             }
         }
     },

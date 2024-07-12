@@ -131,11 +131,11 @@ onMounted(async () => {
             const { count: dataUser, error: errorFetchUser } = await getUserCountById(user.value?.id)
 
             if(!dataUser || dataUser === 0) {
-                const {error: errorUser } = await insertUser({ 
+                const {error: errorUser } = await insertUser([{ 
                     uuid: user.value?.id,
                     name: user.value.identities[0].identity_data['name'],
                     email: user.value?.email
-                })
+                }])
 
                 console.log('user = ',errorFetchUser);
             }
@@ -145,11 +145,11 @@ onMounted(async () => {
             console.log('data user ss= ',dataShoppingSession);
 
             if(!dataShoppingSession && dataShoppingSession === 0) {
-                const { error: errorShoppingSession } = await insertShoppingSession({
+                const { error: errorShoppingSession } = await insertShoppingSession([{
                     user_uuid: user.value?.id,
                     sub_total: 0,
                     total_payment: 0
-                })
+                }])
                 console.log('errorShoppingSession = ',errorShoppingSession);
             }
             

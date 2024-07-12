@@ -1,4 +1,6 @@
-import type { TBodyInsertUser, TuserId } from "~/data/types/user";
+import type { TBodyInsertUser } from "~/data/types/user";
+import type { TuserId } from "~/data/types/params";
+
 
 export const supabaseGetUserCountById = async(id: TuserId) => {
     const { count , error } = await useSupabaseClient<any>()
@@ -9,12 +11,8 @@ export const supabaseGetUserCountById = async(id: TuserId) => {
     return { count, error }
 }
 
-export const supabaseInsertUser = async(body: Prettify<TBodyInsertUser>) => {
-    const { error } = await useSupabaseClient<any>().from('user').insert({ 
-        uuid: body.uuid,
-        name: body.name,
-        email: body.email
-    })
+export const supabaseInsertUser = async(body: Prettify<TBodyInsertUser>[]) => {
+    const { error } = await useSupabaseClient<any>().from('user').insert(body)
 
     return { error }
 }

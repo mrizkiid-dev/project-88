@@ -76,6 +76,9 @@ import type { ITextfieldError } from '~/types/components/textfield';
 import type { ISignUpForm } from '~/types/pages/auth'
 import type { IChoose, ICity, IDistrict } from  '~/types/components/dropdownForm'
 import type { responseProvince, responseCities } from '~/types/response/responseShipping'
+import { insertUser } from '~/data/repository/user_impl';
+import { insertUserAddress } from '~/data/repository/user_address_impl';
+import { getCountShoppingSessionById, insertShoppingSession } from '~/data/repository/shopping_session_impl';
 
 onMounted(() => {
 })
@@ -130,7 +133,17 @@ const signUp = async () => {
         isSignUp.success = false
         const user = useSupabaseUser()
         if (user.value && user.value.id) {
-            const { data, error } = await supabaseClient.from('user').insert([
+            // --- old
+            // const { data, error } = await supabaseClient.from('user').insert([
+            //     { 
+            //         uuid: user.value?.id,
+            //         name: form.fullname,
+            //         email: form.email,
+            //     }
+            // ])
+
+            // -- new
+            const { error } = await insertUser([
                 { 
                     uuid: user.value?.id,
                     name: form.fullname,
@@ -143,34 +156,55 @@ const signUp = async () => {
             } else {
                 console.log('data = ',data);
                 
-                const { error } = await supabaseClient.from('user_address').insert([
-                    { 
-                        whatsapp_number: form.waNumber,
-                        province_id: form.province?.id,
-                        province: form.province?.name,
-                        city_id: form.city?.id,
-                        city: form.city?.name,
-                        additional_address: form.address,
-                        postal_code: form.city?.postal_code
-                    }
-                ])
+                // const { error } = await supabaseClient.from('user_address').insert([
+                //     { 
+                //         whatsapp_number: form.waNumber,
+                //         province_id: form.province?.id,
+                //         province: form.province?.name,
+                //         city_id: form.city?.id,
+                //         city: form.city?.name,
+                //         additional_address: form.address,
+                //         postal_code: form.city?.postal_code
+                //     }
+                // ])
+
+                const { error } = await insertUserAddress([{
+                    whatsapp_number: form.waNumber,
+                    province_id: form.province?.id,
+                    province: form.province?.name,
+                    city_id: form.city?.id,
+                    city: form.city?.name,
+                    additional_address: form.address,
+                    postal_code: form.city?.postal_code
+                }])
+
                 if (error) {
                     console.log('user_address',error);
                 }
 
-                const { count: dataShoppingSession } = await supabaseClient
-                    .from('shopping_session')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('user_uuid', user.value?.id )
+                // -- old
+                // const { count: dataShoppingSession } = await supabaseClient
+                //     .from('shopping_session')
+                //     .select('*', { count: 'exact', head: true })
+                //     .eq('user_uuid', user.value?.id )
+
+                const { count: dataShoppingSession } = await getCountShoppingSessionById(user.value?.id)
 
                     console.log('data user ss= ',dataShoppingSession);
 
                 if(!dataShoppingSession && dataShoppingSession === 0) {
-                    const { error: errorShoppingSession } = await supabaseClient.from('shopping_session').insert({ 
+                    // --old
+                    // const { error: errorShoppingSession } = await supabaseClient.from('shopping_session').insert({ 
+                    //     user_uuid: user.value?.id,
+                    //     sub_total: 0,
+                    //     total_payment: 0
+                    // })
+
+                    const { error: errorShoppingSession } = await insertShoppingSession([{
                         user_uuid: user.value?.id,
                         sub_total: 0,
                         total_payment: 0
-                    })
+                    }])
                     console.log('errorShoppingSession = ',errorShoppingSession);
                 }
                 await profileStore.initProfile()
@@ -293,38 +327,6 @@ watch(() => form.province, async () => {
         }
     }
 })
-
-// District
-// const isDistrictLoading = ref<boolean>(false)
-// const districts = ref<IDistrict[]>([])
-// watch(() => form.city, async () => {
-//     form.district = null
-//     if (form.city !== null) {
-//         isDistrictLoading.value = true
-//         try {
-//             const data: IChoose[] = await $fetch(`https://mrizkiid-dev.github.io/api-wilayah-indonesia/api/districts/${form.city.id}.json`,{ method: 'GET' })
-//             districts.value = data
-//             districts.value.sort(
-//                 (a,b) => {
-//                 let aName = a.name.toLowerCase()
-//                 let bName = b.name.toLowerCase()
-
-//                 if (aName < bName) {
-//                     return -1
-//                 }
-//                 if (aName > bName) {
-//                     return 1
-//                 }
-//                 return 0
-//                 }
-//             )
-//         } catch (error) {
-//             console.log(error);
-//         } finally {
-//             isDistrictLoading.value = false
-//         }
-//     }
-// })
 
 //DropDown Logic
 const isShowDropDown = reactive({

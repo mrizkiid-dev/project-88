@@ -16,12 +16,8 @@ export const supabaseGetShoppingSessionById = async(id: TuserId) => {
     return { data, error }
 }
 
-export const supabaseInsertShoppingSession = async(body: TInsertShoppingSession) => {
-    const { error } = await useSupabaseClient<any>().from('shopping_session').insert({ 
-        user_uuid: body.user_uuid,
-        sub_total: body.sub_total ?? 0,
-        total_payment: body.total_payment ?? 0
-    })
+export const supabaseInsertShoppingSession = async(body: TInsertShoppingSession[]) => {
+    const { error } = await useSupabaseClient<any>().from('shopping_session').insert(body)
 
     return { error }
 }

@@ -12,7 +12,7 @@ export const getShoppingSessionById = async(id: TuserId) => {
     return { data, error }
 }
 
-export const insertShoppingSession = async(body: TInsertShoppingSession) => {
+export const insertShoppingSession = async(body: Prettify<TInsertShoppingSession>[]) => {
     const { error } = await supabaseInsertShoppingSession(body)
     return { error }
 }
