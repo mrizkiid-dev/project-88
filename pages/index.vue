@@ -39,14 +39,7 @@
     </ClientOnly>
 
     <section id="best-seller" v-if="!loadingBestSeller && bestSeller" class="bg-primary relative pt-3 text-third-color tracking-widest font-Inconsolata px-1 sm:px-4 md:px-10 w-full">
-        <!-- <div id="headline" class="marquee-w text-xl md:text-2xl">
-            <div class="marquee">
-                <span>{{ headline }}&nbsp;</span> 
-            </div>
-            <div class="marquee marquee2">
-                <span>{{ headline }}</span>
-            </div>
-        </div> -->
+
         <div class="relative">
 
             <div class="text-5xl font-black flex flex-col justify-center items-start visible absolute z-[1] pr-5 h-full md:text-7xl">
@@ -135,25 +128,9 @@ onMounted(async () => {
             user.value?.id !== null &&
             user.value?.email !== null
         ) {
-            // --old
-            // const { count: dataUser, error: errorFetchUser } = await client
-            //     .from('user')
-            //     .select('*', { count: 'exact', head: true })
-            //     .eq('uuid', user.value?.id )
-            // console.log('data user = ',dataUser);
-            
-            // --new
             const { count: dataUser, error: errorFetchUser } = await getUserCountById(user.value?.id)
 
             if(!dataUser || dataUser === 0) {
-                // --old
-                // const { error: errorUser } = await client.from('user').insert({ 
-                //     uuid: user.value?.id,
-                //     name: user.value.identities[0].identity_data['name'],
-                //     email: user.value?.email
-                // })
-
-                //--new
                 const {error: errorUser } = await insertUser({ 
                     uuid: user.value?.id,
                     name: user.value.identities[0].identity_data['name'],
@@ -163,26 +140,11 @@ onMounted(async () => {
                 console.log('user = ',errorFetchUser);
             }
 
-            // --old
-            // const { count: dataShoppingSession } = await client
-            //     .from('shopping_session')
-            //     .select('*', { count: 'exact', head: true })
-            //     .eq('user_uuid', user.value?.id )
-
-            // --new
             const { count: dataShoppingSession } = await getShoppingSessionById(user.value?.id)
 
             console.log('data user ss= ',dataShoppingSession);
 
             if(!dataShoppingSession && dataShoppingSession === 0) {
-                // -- old
-                // const { error: errorShoppingSession } = await client.from('shopping_session').insert({ 
-                //     user_uuid: user.value?.id,
-                //     sub_total: 0,
-                //     total_payment: 0
-                // })
-
-                // -- new
                 const { error: errorShoppingSession } = await insertShoppingSession({
                     user_uuid: user.value?.id,
                     sub_total: 0,
@@ -208,10 +170,6 @@ onMounted(async () => {
 // BEST-SELLER
 const headline = ref<string>(` Welcome to our store | We have a lot of merch design that perhaps suit with your preferences | These are our best seller | `)
 const { data: bestSeller, pending: loadingBestSeller, error: errorBestSeller, refresh } = useLazyAsyncData('best-seller', async () => {
-    // --old
-    // const { data,error } = await client.from('product').select(`*,product_image(id,image_url)`).order('sell_out',{ ascending: false }).limit(7).returns<ICatalogue[]>()
-
-    // -- new
     const { data, error } = await getBestSeller()
     if (error) {
         console.log('error best-seller = ',JSON.stringify(error));   
@@ -261,10 +219,6 @@ const scrollBestSeller = () => {
 
 // CATALOGUE
 const { data: catalogue, pending: loadingCatalogue, error: errorCatalogue, refresh: refreshCatalogue } = useLazyAsyncData('catalogue', async () => {
-    // --old
-    // const { data,error } = await client.from('product').select(`*,product_image(id,image_url)`).order('sell_out',{ ascending: false }).range(8, 19).returns<ICatalogue[]>()
-
-    // --new
     const { data, error } = await getProducts({
         rangeFrist: 8,
         rangeLast: 19
@@ -303,30 +257,15 @@ const onTapCart = async (id: string | number) => {
     isCartButtonDisable.value = true
     if(user.value && user.value.id) {
         let errorCart: boolean = false
-        // -- old
-        // const {data , error} = await client.from('shopping_session').select('id').eq('user_uuid',user.value.id)
 
-        // -- new 
         const { data, error } = await supabaseGetShoppingSessionById(user.value.id)
         console.log('data = ',data && data.length > 0);
         
         if(data && data.length > 0) {
-            // --old
-            // const { data: dataSelectProduct, error: errorSelectProduct } = await client.from('cart_item').select('id').eq('product_id', id).eq('session_id', data[0].id)
-
-            // -- new
             const { data: dataSelectProduct, error: errorSelectProduct } = await getCartProducts(id, data[0].id)
             console.log(dataSelectProduct);
             
             if (!dataSelectProduct || (dataSelectProduct && dataSelectProduct.length < 1)) {
-                // -- old
-                // const { error } = await client.from('cart_item').insert([{
-                //     session_id: data[0].id,
-                //     product_id: id,
-                //     qty: 1
-                // }])
-
-                // -- new
                 const { error } = await inserCart([{
                     session_id: data[0].id,
                     product_id: id,
