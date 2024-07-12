@@ -102,6 +102,12 @@
 <script setup lang="ts">
 import type { IDatabase } from '~/types/database/supabase'
 import type { IProduct, IProductImage, ICatalogue } from '~/types/database/product'
+import { getUserCountById, insertUser } from '~/data/repository/user_impl';
+import { getShoppingSessionById, insertShoppingSession } from '~/data/repository/shopping_session_impl';
+import { getBestSeller, getProducts } from '~/data/repository/product_impl';
+import { supabaseGetShoppingSessionById } from '~/data/source/network/shopping_session_supabase';
+import { getCartProducts, inserCart } from '~/data/repository/cart_impl';
+import type { TCartInsert } from '~/data/types/cart';
 definePageMeta({
     layout: 'home-page'
 })
@@ -129,34 +135,58 @@ onMounted(async () => {
             user.value?.id !== null &&
             user.value?.email !== null
         ) {
-            const { count: dataUser, error: errorFetchUser } = await client
-                .from('user')
-                .select('*', { count: 'exact', head: true })
-                .eq('uuid', user.value?.id )
-            console.log('data user = ',dataUser);
+            // --old
+            // const { count: dataUser, error: errorFetchUser } = await client
+            //     .from('user')
+            //     .select('*', { count: 'exact', head: true })
+            //     .eq('uuid', user.value?.id )
+            // console.log('data user = ',dataUser);
             
+            // --new
+            const { count: dataUser, error: errorFetchUser } = await getUserCountById(user.value?.id)
+
             if(!dataUser || dataUser === 0) {
-                const { error: errorUser } = await client.from('user').insert({ 
-                uuid: user.value?.id,
-                name: user.value.identities[0].identity_data['name'],
-                email: user.value?.email
+                // --old
+                // const { error: errorUser } = await client.from('user').insert({ 
+                //     uuid: user.value?.id,
+                //     name: user.value.identities[0].identity_data['name'],
+                //     email: user.value?.email
+                // })
+
+                //--new
+                const {error: errorUser } = await insertUser({ 
+                    uuid: user.value?.id,
+                    name: user.value.identities[0].identity_data['name'],
+                    email: user.value?.email
                 })
 
                 console.log('user = ',errorFetchUser);
             }
 
-            const { count: dataShoppingSession } = await client
-                .from('shopping_session')
-                .select('*', { count: 'exact', head: true })
-                .eq('user_uuid', user.value?.id )
+            // --old
+            // const { count: dataShoppingSession } = await client
+            //     .from('shopping_session')
+            //     .select('*', { count: 'exact', head: true })
+            //     .eq('user_uuid', user.value?.id )
 
-                console.log('data user ss= ',dataShoppingSession);
+            // --new
+            const { count: dataShoppingSession } = await getShoppingSessionById(user.value?.id)
+
+            console.log('data user ss= ',dataShoppingSession);
 
             if(!dataShoppingSession && dataShoppingSession === 0) {
-                const { error: errorShoppingSession } = await client.from('shopping_session').insert({ 
-                user_uuid: user.value?.id,
-                sub_total: 0,
-                total_payment: 0
+                // -- old
+                // const { error: errorShoppingSession } = await client.from('shopping_session').insert({ 
+                //     user_uuid: user.value?.id,
+                //     sub_total: 0,
+                //     total_payment: 0
+                // })
+
+                // -- new
+                const { error: errorShoppingSession } = await insertShoppingSession({
+                    user_uuid: user.value?.id,
+                    sub_total: 0,
+                    total_payment: 0
                 })
                 console.log('errorShoppingSession = ',errorShoppingSession);
             }
@@ -178,7 +208,11 @@ onMounted(async () => {
 // BEST-SELLER
 const headline = ref<string>(` Welcome to our store | We have a lot of merch design that perhaps suit with your preferences | These are our best seller | `)
 const { data: bestSeller, pending: loadingBestSeller, error: errorBestSeller, refresh } = useLazyAsyncData('best-seller', async () => {
-    const { data,error } = await client.from('product').select(`*,product_image(id,image_url)`).order('sell_out',{ ascending: false }).limit(7).returns<ICatalogue[]>()
+    // --old
+    // const { data,error } = await client.from('product').select(`*,product_image(id,image_url)`).order('sell_out',{ ascending: false }).limit(7).returns<ICatalogue[]>()
+
+    // -- new
+    const { data, error } = await getBestSeller()
     if (error) {
         console.log('error best-seller = ',JSON.stringify(error));   
         throw JSON.stringify(error)
@@ -227,7 +261,14 @@ const scrollBestSeller = () => {
 
 // CATALOGUE
 const { data: catalogue, pending: loadingCatalogue, error: errorCatalogue, refresh: refreshCatalogue } = useLazyAsyncData('catalogue', async () => {
-    const { data,error } = await client.from('product').select(`*,product_image(id,image_url)`).order('sell_out',{ ascending: false }).range(8, 19).returns<ICatalogue[]>()
+    // --old
+    // const { data,error } = await client.from('product').select(`*,product_image(id,image_url)`).order('sell_out',{ ascending: false }).range(8, 19).returns<ICatalogue[]>()
+
+    // --new
+    const { data, error } = await getProducts({
+        rangeFrist: 8,
+        rangeLast: 19
+    })
     if (error) {
         console.log('error catalogue = ',JSON.stringify(error));   
         throw JSON.stringify(error)
@@ -262,19 +303,36 @@ const onTapCart = async (id: string | number) => {
     isCartButtonDisable.value = true
     if(user.value && user.value.id) {
         let errorCart: boolean = false
-        const {data , error} = await client.from('shopping_session').select('id').eq('user_uuid',user.value.id)
+        // -- old
+        // const {data , error} = await client.from('shopping_session').select('id').eq('user_uuid',user.value.id)
+
+        // -- new 
+        const { data, error } = await supabaseGetShoppingSessionById(user.value.id)
         console.log('data = ',data && data.length > 0);
         
         if(data && data.length > 0) {
-            const { data: dataSelectProduct, error: errorSelectProduct } = await client.from('cart_item').select('id').eq('product_id', id).eq('session_id', data[0].id)
+            // --old
+            // const { data: dataSelectProduct, error: errorSelectProduct } = await client.from('cart_item').select('id').eq('product_id', id).eq('session_id', data[0].id)
+
+            // -- new
+            const { data: dataSelectProduct, error: errorSelectProduct } = await getCartProducts(id, data[0].id)
             console.log(dataSelectProduct);
             
             if (!dataSelectProduct || (dataSelectProduct && dataSelectProduct.length < 1)) {
-                const { error } = await client.from('cart_item').insert([{
+                // -- old
+                // const { error } = await client.from('cart_item').insert([{
+                //     session_id: data[0].id,
+                //     product_id: id,
+                //     qty: 1
+                // }])
+
+                // -- new
+                const { error } = await inserCart([{
                     session_id: data[0].id,
                     product_id: id,
                     qty: 1
-                }])
+                }] as TCartInsert[])
+
                 console.log('kena');
                 
                 if (error) {
