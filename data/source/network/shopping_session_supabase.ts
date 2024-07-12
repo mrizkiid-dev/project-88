@@ -1,5 +1,5 @@
 import type { TInsertShoppingSession } from "~/data/types/shopping_sessiont"
-import type { TuserId } from "~/data/types/user"
+import type { TuserId } from "~/data/types/params"
 
 // const client = useSupabaseClient<any>()
 

@@ -140,7 +140,7 @@ onMounted(async () => {
                 console.log('user = ',errorFetchUser);
             }
 
-            const { count: dataShoppingSession } = await getShoppingSessionById(user.value?.id)
+            const { data: dataShoppingSession, error: errorGetShoppingSessionId } = await getShoppingSessionById(user.value?.id)
 
             console.log('data user ss= ',dataShoppingSession);
 
@@ -258,7 +258,7 @@ const onTapCart = async (id: string | number) => {
     if(user.value && user.value.id) {
         let errorCart: boolean = false
 
-        const { data, error } = await supabaseGetShoppingSessionById(user.value.id)
+        const { data, error } = await getShoppingSessionById(user.value.id)
         console.log('data = ',data && data.length > 0);
         
         if(data && data.length > 0) {
