@@ -1,4 +1,4 @@
-import { supabaseGetCartProducts, supabaseInsertCart } from "../source/network/cart_supabase"
+import { supabaseDeleteCart, supabaseGetCartProducts, supabaseInsertCart } from "../source/network/cart_supabase"
 import type { TCartInsert } from "../types/cart"
 import type { TuserId } from "../types/params"
 
@@ -13,3 +13,8 @@ export const inserCart = async(body: TCartInsert[]) => {
 
     return { error }
 }
+
+export const deleteCart = async(id: number | string) => {
+    const { error } = await supabaseDeleteCart(id)
+    return { error }
+} 

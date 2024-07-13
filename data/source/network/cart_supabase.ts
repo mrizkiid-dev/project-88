@@ -8,6 +8,13 @@ export const supabaseGetCartProducts = async (id: TuserId, shopping_session_id: 
 
 export const supabaseInsertCart = async(body: TCartInsert[]) => {
     const { error } = await useSupabaseClient<any>().from('cart_item').insert(body)
+    return { error }
+}
 
+export const supabaseDeleteCart = async(id: number | string) => {
+    const { error } = await useSupabaseClient<any>()
+        .from('cart_item')
+        .delete()
+        .eq('id', id)
     return { error }
 }

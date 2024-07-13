@@ -131,6 +131,7 @@ import type { ICart } from '~/types/pages/cart';
 import type { TCheckout } from '~/types/checkout';
 import { useUserCheckout } from '~/stores/checkout';
 import HomePage from '~/layouts/home-page.vue';
+import { deleteCartRepo } from '~/data/repository/cart_impl';
 
 definePageMeta({
   layout: 'cart',
@@ -219,11 +220,7 @@ const deleteCart = async (item: ICart) => {
     const positionCheck = checked.value.indexOf(item.cartId)
     checked.value.splice(positionCheck,1)
 
-    const { error } = await useSupabaseClient()
-    .from('cart_item')
-    .delete()
-    .eq('id', item.cartId)
-
+    const { error } = await deleteCartRepo(item.cartId)
     console.log('error cart= ',error);
   }
   
