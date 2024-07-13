@@ -133,16 +133,6 @@ const signUp = async () => {
         isSignUp.success = false
         const user = useSupabaseUser()
         if (user.value && user.value.id) {
-            // --- old
-            // const { data, error } = await supabaseClient.from('user').insert([
-            //     { 
-            //         uuid: user.value?.id,
-            //         name: form.fullname,
-            //         email: form.email,
-            //     }
-            // ])
-
-            // -- new
             const { error } = await insertUser([
                 { 
                     uuid: user.value?.id,
@@ -155,19 +145,6 @@ const signUp = async () => {
                 alert(error.message)
             } else {
                 console.log('data = ',data);
-                
-                // const { error } = await supabaseClient.from('user_address').insert([
-                //     { 
-                //         whatsapp_number: form.waNumber,
-                //         province_id: form.province?.id,
-                //         province: form.province?.name,
-                //         city_id: form.city?.id,
-                //         city: form.city?.name,
-                //         additional_address: form.address,
-                //         postal_code: form.city?.postal_code
-                //     }
-                // ])
-
                 const { error } = await insertUserAddress([{
                     whatsapp_number: form.waNumber,
                     province_id: form.province?.id,
@@ -182,24 +159,11 @@ const signUp = async () => {
                     console.log('user_address',error);
                 }
 
-                // -- old
-                // const { count: dataShoppingSession } = await supabaseClient
-                //     .from('shopping_session')
-                //     .select('*', { count: 'exact', head: true })
-                //     .eq('user_uuid', user.value?.id )
-
                 const { count: dataShoppingSession } = await getCountShoppingSessionById(user.value?.id)
 
                     console.log('data user ss= ',dataShoppingSession);
 
                 if(!dataShoppingSession && dataShoppingSession === 0) {
-                    // --old
-                    // const { error: errorShoppingSession } = await supabaseClient.from('shopping_session').insert({ 
-                    //     user_uuid: user.value?.id,
-                    //     sub_total: 0,
-                    //     total_payment: 0
-                    // })
-
                     const { error: errorShoppingSession } = await insertShoppingSession([{
                         user_uuid: user.value?.id,
                         sub_total: 0,
