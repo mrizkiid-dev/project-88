@@ -153,6 +153,8 @@ import type { IChoose, ICity } from '~/types/components/dropdownForm'
 import type { responseCities, responseProvince } from '~/types/response/responseShipping';
 import type { TAddress } from '~/types/components/address'
 import type { TSnapCreateTransaction, TMidItemDetails, TMidCustomer } from '~/types/midtrans/midtrans-api';
+import { getUserAddress, insertUserAddress, updateUserAddress } from '~/data/repository/user_address_impl';
+import { createOrder, updateOrder } from '~/data/repository/order_impl';
 
 const { isMobile } = useScreen()
 const checkoutStore = useUserCheckout()
@@ -365,32 +367,27 @@ const initCheckout = async() => {
 const submitAddress = async () => {
   console.log('aaa = ' ,profileStore.uuid)
   try {
-    const {data, error } = await supabaseClient.from('user_address').select('id').eq('user_uuid', profileStore.uuid).limit(1)
+    const { data, error } = await getUserAddress(profileStore.uuid)
     if (data && data.length > 0 && data[0].id) {
       console.log('id = ',data[0].id);
       
-      const { error } = await supabaseClient
-      .from('user_address')
-      .update(
-        { 
-          whatsapp_number: formAddress.telephone,
-          province_id: formAddress.province?.id,
-          province: formAddress.province?.name,
-          city_id: formAddress.city?.id,
-          city: formAddress.city?.name,
-          postal_code: formAddress.city?.postal_code,
-          additional_address: formAddress.address
-        }
-      ).eq('id',data[0].id)
+      //  -- old
+      // const { error } = await supabaseClient
+      // .from('user_address')
+      // .update(
+      //   { 
+      //     whatsapp_number: formAddress.telephone,
+      //     province_id: formAddress.province?.id,
+      //     province: formAddress.province?.name,
+      //     city_id: formAddress.city?.id,
+      //     city: formAddress.city?.name,
+      //     postal_code: formAddress.city?.postal_code,
+      //     additional_address: formAddress.address
+      //   }
+      // ).eq('id',data[0].id)
 
-      if (error) {
-        throw JSON.stringify(error)
-      }
-    } else {
-      const { error } = await supabaseClient
-      .from('user_address')
-      .insert(
-        { 
+      // --new
+      const { error } = await updateUserAddress(data[0].id, { 
           whatsapp_number: formAddress.telephone,
           province_id: formAddress.province?.id,
           province: formAddress.province?.name,
@@ -400,6 +397,35 @@ const submitAddress = async () => {
           additional_address: formAddress.address
         }
       )
+
+      if (error) {
+        throw JSON.stringify(error)
+      }
+    } else {
+      // const { error } = await supabaseClient
+      // .from('user_address')
+      // .insert(
+      //   { 
+      //     whatsapp_number: formAddress.telephone,
+      //     province_id: formAddress.province?.id,
+      //     province: formAddress.province?.name,
+      //     city_id: formAddress.city?.id,
+      //     city: formAddress.city?.name,
+      //     postal_code: formAddress.city?.postal_code,
+      //     additional_address: formAddress.address
+      //   }
+      // )
+      const { error } = await insertUserAddress([
+        { 
+          whatsapp_number: formAddress.telephone,
+          province_id: formAddress.province?.id,
+          province: formAddress.province?.name,
+          city_id: formAddress.city?.id,
+          city: formAddress.city?.name,
+          postal_code: formAddress.city?.postal_code,
+          additional_address: formAddress.address
+        }
+      ])
 
       if (error) {
         throw JSON.stringify(error)
@@ -479,27 +505,42 @@ const submit = async() => {
           } 
         })
 
-      const { data, error } = await supabaseClient
-        .rpc('create_order', {
-          _order: {
-            shopping_session_id: profileStore.sessionId,
-            name_receiver: profileStore.name,
-            detail_address: profileStore.additionalAddress,
-            city_id: profileStore.city.id,
-            city: profileStore.city.name,
-            province_id: profileStore.province.id,
-            province: profileStore.province.name,
-            sub_total: checkoutStore.subTotal,
-            total_payment: checkoutStore.totalPayment,
-            shipping_price: checkoutStore.shipping.price,
-          },
-          _order_item: orderItemBody
-        })
-        .returns<{
-          status: string
-          message: string
-          order_id?: number
-        } | undefined>()
+      // const { data, error } = await supabaseClient
+      //   .rpc('create_order', {
+      //     _order: {
+      //       shopping_session_id: profileStore.sessionId,
+      //       name_receiver: profileStore.name,
+      //       detail_address: profileStore.additionalAddress,
+      //       city_id: profileStore.city.id,
+      //       city: profileStore.city.name,
+      //       province_id: profileStore.province.id,
+      //       province: profileStore.province.name,
+      //       sub_total: checkoutStore.subTotal,
+      //       total_payment: checkoutStore.totalPayment,
+      //       shipping_price: checkoutStore.shipping.price,
+      //     },
+      //     _order_item: orderItemBody
+      //   })
+      //   .returns<{
+      //     status: string
+      //     message: string
+      //     order_id?: number
+      //   } | undefined>()
+
+      const { data, error } = await createOrder( {
+          shopping_session_id: profileStore.sessionId,
+          name_receiver: profileStore.name,
+          detail_address: profileStore.additionalAddress,
+          city_id: profileStore.city.id,
+          city: profileStore.city.name,
+          province_id: profileStore.province.id,
+          province: profileStore.province.name,
+          sub_total: checkoutStore.subTotal,
+          total_payment: checkoutStore.totalPayment,
+          shipping_price: checkoutStore.shipping.price,
+        },
+        orderItemBody
+      )
 
       // Check for errors
       if (error) {
@@ -556,10 +597,14 @@ const submit = async() => {
         })
 
         if (response && typeof response === 'object' && 'token' in response && typeof response.token === 'string'){
-          const { error } = await supabaseClient.from('order').update({
+          // const { error } = await supabaseClient.from('order').update({
+          //   midtrans_id: midtransId,
+          //   midtrans_token: response.token,
+          // }).eq('id', data?.order_id)
+          const { error } = await updateOrder(data?.order_id, {
             midtrans_id: midtransId,
             midtrans_token: response.token,
-          }).eq('id', data?.order_id)
+          } )
 
           if ( !error ) {
             navigateTo(`/payment/${data?.order_id}`)

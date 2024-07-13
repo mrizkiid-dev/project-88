@@ -14,7 +14,7 @@ export const inserCart = async(body: TCartInsert[]) => {
     return { error }
 }
 
-export const deleteCart = async(id: number | string) => {
+export const deleteCartRepo = async(id: number | string) => {
     const { error } = await supabaseDeleteCart(id)
     return { error }
 } 

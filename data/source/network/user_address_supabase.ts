@@ -7,3 +7,17 @@ export const supabaseInsertUserAddress = async(body: TUserAddressp[]) => {
 
     return { error }
 }
+
+export const supabaseGetUserAddress = async(uuid: string) => {
+    const {data, error } = await useSupabaseClient<any>().from('user_address').select('id').eq('user_uuid', uuid)
+    return { data, error }
+}
+
+export const supabaseUpdateUserAddress = async(id: string | number, body: TUserAddressp) => {
+    const { error } = await useSupabaseClient<any>()
+      .from('user_address')
+      .update(body)
+      .eq('id',id)
+
+    return { error }
+}
