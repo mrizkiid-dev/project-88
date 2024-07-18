@@ -1,4 +1,7 @@
 import { defineStore } from 'pinia'
+import { deleteCartItem, getCartItemProduts } from '~/data/repository/cart_item_impl'
+import { getInitProfile } from '~/data/repository/profile_impl'
+import { getInitUserAddress } from '~/data/repository/user_address_impl'
 import type { city, province } from '~/types/database/profile'
 import type { IDatabase } from '~/types/database/supabase'
 import type { ICart } from '~/types/pages/cart'
@@ -30,20 +33,23 @@ export const useProfileStore = defineStore('profile-store', {
             try {
                 this.cart = []
                 if (this.sessionId !== '') {
-                    const {data , error} = await useSupabaseClient<IDatabase>().from('cart_item').select(`id,qty,product(id,name,price,product_image(image_url),qty,weight)`).eq('session_id',this.sessionId).returns<{id: any;
-                        qty: any;
-                        product: {
-                            id: any
-                            name: any;
-                            price: any;
-                            qty: any
-                            weight: any
-                            product_image: {
-                                image_url: any;
-                            }[];
-                        };
-                    }[]>()
-                    
+                    // -- old
+                    // const {data , error} = await useSupabaseClient<IDatabase>().from('cart_item').select(`id,qty,product(id,name,price,product_image(image_url),qty,weight)`).eq('session_id',this.sessionId).returns<{id: any;
+                    //     qty: any;
+                    //     product: {
+                    //         id: any
+                    //         name: any;
+                    //         price: any;
+                    //         qty: any
+                    //         weight: any
+                    //         product_image: {
+                    //             image_url: any;
+                    //         }[];
+                    //     };
+                    // }[]>()
+
+                    // -- new
+                    const { data, error } = await getCartItemProduts(this.sessionId)
                     if(data !== null && error === null) {
                         let cart_temp: ICart
                         let ids = [] as number[]
@@ -78,9 +84,11 @@ export const useProfileStore = defineStore('profile-store', {
         async initProfile() {
             try {
                 if (useSupabaseUser().value?.id !== undefined) {
-                    const {data , error} = await useSupabaseClient<IDatabase>().from('user')
-                        .select(`uuid,name,email,shopping_session(id,sub_total,total_payment),user_address(whatsapp_number,province_id,province,city_id,city,district,additional_address)`)
-                        .eq('uuid',useSupabaseUser().value?.id).limit(1)
+                    // const {data , error} = await useSupabaseClient<IDatabase>().from('user')
+                    //     .select(`uuid,name,email,shopping_session(id,sub_total,total_payment),user_address(whatsapp_number,province_id,province,city_id,city,district,additional_address)`)
+                    //     .eq('uuid',useSupabaseUser().value?.id).limit(1)
+
+                    const { data, error } = await getInitProfile(useSupabaseUser().value?.id)
                     if (error) {
                         throw JSON.stringify(error);
                     }
@@ -115,8 +123,12 @@ export const useProfileStore = defineStore('profile-store', {
         async initAddress() {
             try {
                 if (useSupabaseUser().value?.id !== undefined) {
-                    const {data, error} = await useSupabaseClient<any>().from('user_address')
-                        .select('whatsapp_number,province,province_id,city,city_id,district,additional_address').eq('user_uuid',useSupabaseUser().value?.id).limit(1)
+                    // -- old
+                    // const {data, error} = await useSupabaseClient<any>().from('user_address')
+                    //     .select('whatsapp_number,province,province_id,city,city_id,district,additional_address').eq('user_uuid',useSupabaseUser().value?.id).limit(1)
+
+                    // --new
+                    const { data, error } = await getInitUserAddress(useSupabaseUser().value?.id)
                     if (data && data.length > 0) {
                         this.phoneNumber = data[0].whatsapp_number
                         this.province.id = data[0].province_id ?? ''
@@ -145,10 +157,14 @@ export const useProfileStore = defineStore('profile-store', {
                 this.cart.splice(index, 1)
             }
 
-            const { error } = await useSupabaseClient()
-                .from('cart_item')
-                .delete()
-                .eq('id', id)
+            // --old
+            // const { error } = await useSupabaseClient()
+            //     .from('cart_item')
+            //     .delete()
+            //     .eq('id', id)
+
+            // --new
+            const { error } = await deleteCartItem(id)
         },
         async initMaxQts(ids: number[]) {
             if(ids.length > 0) {

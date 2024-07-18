@@ -32,6 +32,8 @@
 </template>
 
 <script setup lang="ts">
+import { getMidtransTokenById } from '~/data/repository/order_impl';
+
 const { isMobile } = useScreen()
 const route = useRoute()
 
@@ -44,7 +46,11 @@ onMounted( async() => {
         if(!(route.params.id && typeof route.params.id === 'string' && isANumber(route.params.id))) {
             throw 'route should be number and the input is only one id'
         }
-        const { data, error } = await useSupabaseClient().from('order').select('midtrans_token').eq('id', route.params.id)
+        // --old
+        // const { data, error } = await useSupabaseClient().from('order').select('midtrans_token').eq('id', route.params.id)
+
+        // --new
+        const { data, error } = await getMidtransTokenById(route.params.id)
         if ( data && data.length > 0 && data[0].midtrans_token){
             isTokenExist.value = true
             await loadScriptMidtrans({

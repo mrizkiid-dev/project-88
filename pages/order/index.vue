@@ -61,6 +61,7 @@
 </template>
 
 <script setup lang="ts">
+import { getOrderPagination, getTotalOrdersRow } from '~/data/repository/order_impl';
 import type { TOrdersComponent, TOrdersItemComponent, TResponseOrder } from '~/types/components/order';
 
 definePageMeta({
@@ -113,12 +114,25 @@ const parseData = (data: TResponseOrder[] | null,count: number | null) => {
 
 const fetchData = async () => {
     const profileStore = useProfileStore()
-    const {data, error} = await supabaseClient.from('order').select('id,created_at,total_payment,order_item(product_id,product_name,quantity,price,image_url)')
-                            .eq('shopping_session_id',profileStore.sessionId)
-                            .range(start.value, offset.value)
-                            .limit(2, { foreignTable: 'order_item' }).order('id',{ ascending: false })
-                            .returns<TResponseOrder[]>()
-    const {count, error:errorCount} = await supabaseClient.from('order').select('id', { count: 'exact', head: true }).eq('shopping_session_id',profileStore.sessionId)
+    // -- old
+    // const {data, error} = await supabaseClient.from('order').select('id,created_at,total_payment,order_item(product_id,product_name,quantity,price,image_url)')
+    //                         .eq('shopping_session_id',profileStore.sessionId)
+    //                         .range(start.value, offset.value)
+    //                         .limit(2, { foreignTable: 'order_item' }).order('id',{ ascending: false })
+    //                         .returns<TResponseOrder[]>()
+
+    // --new
+    const { data, error } = await getOrderPagination({
+        sessionId: profileStore.sessionId,
+        start: start.value,
+        offset: offset.value
+    })
+
+    // -- old
+    // const {count, error:errorCount} = await supabaseClient.from('order').select('id', { count: 'exact', head: true }).eq('shopping_session_id',profileStore.sessionId)
+
+    // -- new
+    const { count, error:errorCount } = await getTotalOrdersRow(profileStore.sessionId)
     return { data, error, count, errorCount }
 }
 

@@ -44,6 +44,9 @@
 </template>
 
 <script setup lang="ts">
+import { getCartItemProductDetail, getInsertCartItem } from '~/data/repository/cart_item_impl';
+import { getProductDetail } from '~/data/repository/product_impl';
+import { getShoppingSessionById } from '~/data/repository/shopping_session_impl';
 import type { ICatalogue } from '~/types/database/product';
 
 
@@ -86,7 +89,9 @@ onMounted(() => {
 })
 
 const { data, pending, error, status, refresh } = useLazyAsyncData('product-detail0626', async () => {
-    const { data,error } = await client.from('product').select(`*,product_image(id,image_url)`).order('sell_out',{ ascending: false }).eq(`id`,route.params.id).limit(1).returns<ICatalogue[]>()
+    // --old
+    // const { data,error } = await client.from('product').select(`*,product_image(id,image_url)`).order('sell_out',{ ascending: false }).eq(`id`,route.params.id).limit(1).returns<ICatalogue[]>()
+    const { data, error } = await getProductDetail(route.params.id)
     if (error) {
         console.log('error = ',JSON.stringify(error))  
         throw JSON.stringify(error)
@@ -137,16 +142,36 @@ const submit = async () => {
         isLoading.value = true
         if(user.value && user.value.id) {
             let errorCart: boolean = false
-            const {data , error} = await client.from('shopping_session').select('id').eq('user_uuid',user.value.id)
+
+            // -- old
+            // const {data , error} = await client.from('shopping_session').select('id').eq('user_uuid',user.value.id)
+
+            const { data, error } = await getShoppingSessionById(user.value.id)
             
             if(data && data.length > 0) {
-                const { data: dataSelectProduct, error: errorSelectProduct } = await client.from('cart_item').select('id').eq('product_id', route.params.id).eq('session_id', data[0].id)
+                // const { data: dataSelectProduct, error: errorSelectProduct } = await client.from('cart_item').select('id').eq('product_id', route.params.id).eq('session_id', data[0].id)
+                const { data: dataSelectProduct, error: errorSelectProduct } = await getCartItemProductDetail(route.params.id,data[0].id)
                 console.log(dataSelectProduct);
                 
                 if (!dataSelectProduct || (dataSelectProduct && dataSelectProduct.length < 1)) {
-                    const { error } = await client.from('cart_item').insert([{
+                    // -- old
+                    // const { error } = await client.from('cart_item').insert([{
+                    //     session_id: data[0].id,
+                    //     product_id: route.params.id,
+                    //     qty: 1
+                    // }])
+
+                    let productId: string = ''
+                    if ( Array.isArray(route.params)) {
+                        productId = route.params[0].id
+                    } else if (typeof route.params.id === 'string'){
+                        productId = route.params.id
+                    }
+
+                    // --new
+                    const { error } = await getInsertCartItem([{
                         session_id: data[0].id,
-                        product_id: route.params.id,
+                        product_id: productId,
                         qty: 1
                     }])
                     

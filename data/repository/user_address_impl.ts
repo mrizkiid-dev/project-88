@@ -1,4 +1,4 @@
-import { supabaseGetUserAddress, supabaseInsertUserAddress, supabaseUpdateUserAddress } from "../source/network/user_address_supabase"
+import { supabaseGetInitAddress, supabaseGetUserAddress, supabaseInsertUserAddress, supabaseUpdateUserAddress } from "../source/network/user_address_supabase"
 import type { TUserAddressp } from "../types/user_address"
 
 export const insertUserAddress = async(body: Prettify<TUserAddressp>[]) => {
@@ -14,4 +14,9 @@ export const getUserAddress = async(uuid: string) => {
 export const updateUserAddress = async(id: string | number, body: Prettify<TUserAddressp>) => {
     const { error } = await supabaseUpdateUserAddress(id, body)
     return { error}
+}
+
+export const getInitUserAddress = async(uuid: string | undefined) => {
+    const { data, error } = await supabaseGetInitAddress(uuid)
+    return { data, error }
 }

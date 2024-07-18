@@ -1,4 +1,4 @@
 /**
  * This is custom type that use for no returns function
  */
-type TVoidCallback = (...args: any[]) => void
+export type TVoidCallback = (...args: any[]) => void

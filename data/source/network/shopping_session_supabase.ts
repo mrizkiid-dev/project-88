@@ -21,3 +21,5 @@ export const supabaseInsertShoppingSession = async(body: TInsertShoppingSession[
 
     return { error }
 }
+
+// export const supabaseGetProById

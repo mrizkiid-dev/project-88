@@ -1,3 +1,4 @@
+import { getProductSearchSuggest } from "~/data/repository/product_impl"
 import type { TSearchResult } from "~/types/components/searchResult"
 
 export const useSearchProductAppBar = () => {
@@ -16,19 +17,24 @@ export const useSearchProductAppBar = () => {
         if (search && search !== '') {
             try {
                 isSearchLoading.value = true
-                const { data, error } = 
-                await supabaseClient.from('product')
-                    .select('id,name,price,product_image(image_url)')
-                    .ilike('name', `%${search}%`)
-                    .limit(10)
-                    .returns<{
-                            id: number | string,
-                            name: string,
-                            price: number,
-                            product_image: {
-                                    image_url: string
-                            }[]
-                    }[]>()
+
+                // --old
+                // const { data, error } = 
+                // await supabaseClient.from('product')
+                //     .select('id,name,price,product_image(image_url)')
+                //     .ilike('name', `%${search}%`)
+                //     .limit(10)
+                //     .returns<{
+                //             id: number | string,
+                //             name: string,
+                //             price: number,
+                //             product_image: {
+                //                     image_url: string
+                //             }[]
+                //     }[]>()
+
+                // -- new
+                const { data, error } = await getProductSearchSuggest(search)
                 
                 if (data && data.length > 0) {
                     searchResult.value = []

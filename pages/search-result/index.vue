@@ -49,6 +49,7 @@
 </template>
 
 <script setup lang="ts">
+import { getCountProductsBySearch, getCountProductsRow, getProductSearch, getProductsRow } from '~/data/repository/product_impl';
 import type { ICatalogue, ISearchResult } from '~/types/database/product';
 
 const { isMobile } = useScreen()
@@ -74,25 +75,34 @@ const offset = ref<number>(11)
 
 const { data: product, pending, error, status ,refresh } = useLazyAsyncData('search-result', async () => {
     if(isQuery.value) {
-        const { data,error } = await client.from('product').select(`*,product_image(id,image_url)`).ilike('name', `%${keyword.value}%`).order('sell_out',{ ascending: false }).range(start.value, offset.value).returns<ICatalogue[]>()
+        // --old
+        // const { data,error } = await client.from('product').select(`*,product_image(id,image_url)`).ilike('name', `%${keyword.value}%`).order('sell_out',{ ascending: false }).range(start.value, offset.value).returns<ICatalogue[]>()
+
+        // --new
+        const { data, error } = await getProductSearch({
+            keyword: keyword.value,
+            isAscending: false,
+            start: start.value,
+            offset: offset.value
+        })
         if (error) {
             console.log('error = ',error);   
-            throw createError({
-                statusMessage: error?.message,
-                statusCode: 404,
-                message: error?.message,
-            })
+            throw JSON.stringify(error)
         }
         return data
     } else {
-        const { data,error } = await client.from('product').select(`*,product_image(id,image_url)`).order('sell_out',{ ascending: false }).range(start.value, offset.value).returns<ICatalogue[]>()
+        // --old
+        // const { data, error } = await client.from('product').select(`*,product_image(id,image_url)`).order('sell_out',{ ascending: false }).range(start.value, offset.value).returns<ICatalogue[]>()
+
+        // --new
+        const { data, error } = await getProductsRow({
+            isAscending: false,
+            start: start.value,
+            offset: offset.value
+        })
         if (error) {
             console.log('error = ',error);   
-            throw createError({
-                statusMessage: error?.message,
-                statusCode: 404,
-                message: error?.message,
-            })
+            throw JSON.stringify(error)
         }
         return data
     }
@@ -100,14 +110,14 @@ const { data: product, pending, error, status ,refresh } = useLazyAsyncData('sea
 
 const { data: rowCount, error: errorCount, status: statusCount } = useLazyAsyncData('row', async () => { 
     if (isQuery.value) {
-        const { count, error } = await client.from('product').select(`*,product_image(id,image_url)`, { count: 'exact', head: true }).ilike('name', `%${keyword.value}%`)
+        // -- old
+        // const { count, error } = await client.from('product').select(`*,product_image(id,image_url)`, { count: 'exact', head: true }).ilike('name', `%${keyword.value}%`)
+
+        // --new
+        const { count, error } = await getCountProductsBySearch(keyword.value)
         if (error) {
             console.log('errorCount = ',error);   
-            throw createError({
-                statusMessage: error?.message,
-                statusCode: 404,
-                message: error?.message,
-            })
+            throw JSON.stringify(error)
         }
 
         let rowCount: number = 0
@@ -122,14 +132,14 @@ const { data: rowCount, error: errorCount, status: statusCount } = useLazyAsyncD
 
         return rowCount
     } else {
-        const { count, error } = await client.from('product').select(`*,product_image(id,image_url)`, { count: 'exact', head: true })
+        // -- old
+        // const { count, error } = await client.from('product').select(`*,product_image(id,image_url)`, { count: 'exact', head: true })
+
+        // -- new
+        const { count, error } = await getCountProductsRow()
         if (error) {
             console.log('errorCount = ',error);   
-            throw createError({
-                statusMessage: error?.message,
-                statusCode: 404,
-                message: error?.message,
-            })
+            throw JSON.stringify(error)
         }
 
         let rowCount: number = 0

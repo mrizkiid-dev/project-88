@@ -76,10 +76,16 @@ import type { responseProvince, responseCities } from '~/types/response/response
 import type { TDatabase, IDatabase } from '~/types/database/supabase'
 import type { TUser } from '~/types/database/user'
 import { onBeforeUnmount } from 'vue';
+import { getProfileDetail } from '~/data/repository/profile_impl';
 
 onMounted(async() => {
     try {
-        const { data, error } = await supabaseClient.from('user').select('name,email,user_address(whatsapp_number, province_id, province, city_id, city, district, additional_address)').eq('uuid', profileStore.uuid)
+        // --old
+        // const { data, error } = await supabaseClient.from('user').select('name,email,user_address(whatsapp_number, province_id, province, city_id, city, district, additional_address)').eq('uuid', profileStore.uuid)
+
+        // --new
+        const { data, error } = await getProfileDetail(profileStore.uuid)
+        
         if (error) {
             throw JSON.stringify(error)
         }

@@ -110,6 +110,7 @@
 </template>
 
 <script setup lang="ts">
+import { getOrderDetailByID } from '~/data/repository/order_impl';
 import type { TOrdersItemComponent } from '~/types/components/order';
 
 const { isMobile } = useScreen()
@@ -154,7 +155,10 @@ const detailOrder = ref<TDetailOrder>({
 const itemOrder = ref<TOrdersItemComponent[]>([])
 
 if (route.params.id) {
-    const { data, error } = await supabaseClient.from('order').select('id,name_receiver,detail_address,city,city_id,province,province_id,created_at,shipping_price,sub_total,total_payment,order_item(product_id,product_name,quantity,price,image_url)').eq('id',route.params.id).limit(1)
+    // --old
+    // const { data, error } = await supabaseClient.from('order').select('id,name_receiver,detail_address,city,city_id,province,province_id,created_at,shipping_price,sub_total,total_payment,order_item(product_id,product_name,quantity,price,image_url)').eq('id',route.params.id).limit(1)
+
+    const { data, error } = await getOrderDetailByID(route.params.id)
 
     if (data && data.length > 0) {
         userDetail.value.name = data[0].name_receiver

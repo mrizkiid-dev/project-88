@@ -21,3 +21,10 @@ export const supabaseUpdateUserAddress = async(id: string | number, body: TUserA
 
     return { error }
 }
+
+export const supabaseGetInitAddress = async(uuid: string | undefined) => {
+    const {data, error} = await useSupabaseClient<any>().from('user_address')
+                        .select('whatsapp_number,province,province_id,city,city_id,district,additional_address').eq('user_uuid',uuid).limit(1)
+
+    return { data, error }
+}
